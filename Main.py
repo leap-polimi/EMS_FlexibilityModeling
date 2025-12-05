@@ -1,6 +1,8 @@
 """
-Energy Management System - Main script
-Copyright (C) 2025 LEAP - Authors: M.Zatti, M. Gabba, F. Bovera
+Energy Management System (EMS) - Main script
+Copyright (C) 2020-2024 LEAP - Authors: M.Zatti, M. Gabba, F. Bovera
+
+This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
