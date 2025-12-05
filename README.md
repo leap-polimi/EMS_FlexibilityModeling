@@ -30,7 +30,7 @@ The main goal of EMS is to plan the management strategy of the energy production
 
 It can solve two kind of problems:
 
-**SCHEDULING - Day-ahead scheduling: the plan for tomorrow**
+## SCHEDULING - Day-ahead scheduling: the plan for tomorrow
 
 The "scheduling" mode solves the problem of finding the best management plan of the energy production, storage and utilization systems for the next calendar day and the exchange program with the power grid (hence, possibly, the participation to the energy markets).
 
@@ -40,7 +40,7 @@ The goal is, typically, to meet the energy demand at minimal cost, while respect
 
 The output schedule can be used for the Day-Ahead Market bidding, but there are options to optimize the plant considering also the participation in the Ancillary Services Market (ASM).
 
-**RESCHEDULING - Intra-day scheduling adjustments: reacting to the unexpected**
+## RESCHEDULING - Intra-day scheduling adjustments: reacting to the unexpected
 The "rescheduling" mode oversees the re-assessment of the optimal schedule, as events unfold along the current day: forecasts may result erroneous, user choices may change, a market or a system operator signal materialize, a unit may have become unavailable. 
 
 Similarly to the day-ahead model, the near real-time operation module has a MILP at its core. While the former typically uses detailed formulations to ensure accurate results, the latter can be based on simplified or reduced formulations to guarantee the computational tractability or because sub-problems need to be addressed.
