@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 Energy Management System (EMS) - BOILER block
-Copyright (C) 2020-2024 LEAP - Authors: M.Zatti, M. Gabba, F. Bovera
+Copyright (C) 2020-2024 LEAP scarl
+Authors:
+- Matteo Zatti
+- Marco Gabba
+- Filippo Bovera
 
 This file is part of EMS
 
