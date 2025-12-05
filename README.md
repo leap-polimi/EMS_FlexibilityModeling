@@ -1,5 +1,7 @@
 Energy Management System (EMS) - Main script
+
 Copyright (C) 2020-2024 LEAP scarl
+
 Authors:
 - Matteo Zatti
 - Marco Gabba
