@@ -48,3 +48,26 @@ The "rescheduling" mode oversees the re-assessment of the optimal schedule, as e
 Similarly to the day-ahead model, the near real-time operation module has a MILP at its core. While the former typically uses detailed formulations to ensure accurate results, the latter can be based on simplified or reduced formulations to guarantee the computational tractability or because sub-problems need to be addressed.
 
 This module allows to manage several electricity markets: from buying/selling energy in Intra-Day markets (for example, to compensate for an error in the PV production forecast) to reacting to ASM signals.
+
+# How to use EMS
+
+## preparing the test
+
+The folder "/examples" contains an example of a scheduling problem and a rescheduling problem.
+Users can edit default parameter values using the .yaml file (for an extended list of available parameters, check relevant models in the /src folder).
+
+## running the model
+
+The file "Main.py" contains the code to run a test file and display values of relevant variables.
+It includes:
+- routines for reading the input (either from .yaml files or an already consolidated .txt file containing the overall python dictionary describing input;
+- Pyomo instance creation
+- Running the problem (Gurobi solver is needed to run the examples)
+- Examples of how to print the value of selected variables
+
+Results are serialized in a pickle file using cloudpickle library. This allows the user to access results without having to run the problem again (see report creaction section)
+
+## report creation
+
+The file "Report.py" includes routines to generate comprehensive reports and figures reading the serialized solution of a test.
+As an example, routines to save variables and display graphs regarding electric, thermal and natural gas balances are included in the "/src/CIRCUIT.py" file.
