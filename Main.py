@@ -37,7 +37,7 @@ time_limit = 1800 #s
 
 # Insert the folder of the proposed test from the TEST_folder in "TEST_SELECTION"   
 TEST_FOLDER = 'examples'
-TEST_SELECTION  = '0_rescheduling'
+TEST_SELECTION  = '0_scheduling'
 TEST_NAME="input.txt"
 FILE_PATH = './'+TEST_FOLDER+'/'+TEST_SELECTION
 

@@ -146,8 +146,8 @@ def create_block(b,g):
     b.power_chargeDC_v = Var(b.TIME_s, within=NonNegativeReals) # :param power_chargeDC_v: [pu] Power charged into the battery in current timestep (DC side), in terms of per-unit of nominal power
     b.power_chargeAC_v = Var(b.TIME_s, within=NonNegativeReals) # :param power_chargeAC_v: [pu] Power charged into the battery in current timestep (DC side), in terms of per-unit of nominal power    
     
-    b.logic_dischargeLutStepSelection_v = Var(b.vertex_dischargeLut_s, b.TIME_s, within=NonNegativeReals) # :param logic_dischargeLutStepSelection_v: [-] linear convex envelope points - discharging phase [0-1]
-    b.logic_chargeLutStepSelection_v = Var(b.vertex_chargeLut_s, b.TIME_s, within=NonNegativeReals) # :param logic_chargeLutStepSelection_v: [-] linear convex envelope points - charging phase [0-1]
+    b.logic_dischargeLutPointWeight_v = Var(b.vertex_dischargeLut_s, b.TIME_s, within=NonNegativeReals) # :param logic_dischargeLutPointWeight_v: [-] linear convex envelope points - discharging phase [0-1]
+    b.logic_chargeLutPointWeight_v = Var(b.vertex_chargeLut_s, b.TIME_s, within=NonNegativeReals) # :param logic_chargeLutPointWeight_v: [-] linear convex envelope points - charging phase [0-1]
     
     b.logic_isDischarging_v = Var(b.TIME_s, within=Binary) # :param logic_isDischarging_v: [-] 1 = The battery is discharging in this timestep
     b.logic_isCharging_v = Var(b.TIME_s, within=Binary) # :param logic_isCharging_v: [-] 1 = The battery is charging in this timestep
@@ -192,34 +192,34 @@ def create_block(b,g):
     # Power discharged - DC side 
     @b.Constraint(b.TIME_s)
     def power_discharge_DC_calc(b,t):
-        val = sum(b.power_dischargeDC_p[k]*b.logic_dischargeLutStepSelection_v[k,t] for k in b.vertex_dischargeLut_s)
+        val = sum(b.power_dischargeDC_p[k]*b.logic_dischargeLutPointWeight_v[k,t] for k in b.vertex_dischargeLut_s)
         return b.power_dischargeDC_v[t] == val
     
     # Power discharged - AC side
     @b.Constraint(b.TIME_s)
     def power_discharge_AC_calc(b,t):
-        val = sum(b.power_dischargeAC_p[k]*b.logic_dischargeLutStepSelection_v[k,t] for k in b.vertex_dischargeLut_s)
+        val = sum(b.power_dischargeAC_p[k]*b.logic_dischargeLutPointWeight_v[k,t] for k in b.vertex_dischargeLut_s)
         return b.power_dischargeAC_v[t] == val
     
     
     # Power charged - DC side 
     @b.Constraint(b.TIME_s)
     def power_charge_DC_calc(b,t):
-        val = sum(b.power_chargeDC_p[k]*b.logic_chargeLutStepSelection_v[k,t] for k in b.vertex_chargeLut_s)
+        val = sum(b.power_chargeDC_p[k]*b.logic_chargeLutPointWeight_v[k,t] for k in b.vertex_chargeLut_s)
         return b.power_chargeDC_v[t] == val
     
     # Power charged - AC side
     @b.Constraint(b.TIME_s)
     def power_charge_AC_calc(b,t):
-        val = sum(b.power_chargeAC_p[k]*b.logic_chargeLutStepSelection_v[k,t] for k in b.vertex_chargeLut_s)
+        val = sum(b.power_chargeAC_p[k]*b.logic_chargeLutPointWeight_v[k,t] for k in b.vertex_chargeLut_s)
         return b.power_chargeAC_v[t] == val
     
     # SOC variation
     @b.Constraint(b.TIME_s)
     def soc_variation_calc(b,t):
         val = \
-            sum(b.energy_chargeSoc_p[k]*b.logic_chargeLutStepSelection_v[k,t] for k in b.vertex_chargeLut_s) \
-          + sum(b.energy_dischargeSoc_p[k]*b.logic_dischargeLutStepSelection_v[k,t] for k in b.vertex_dischargeLut_s)\
+            sum(b.energy_chargeSoc_p[k]*b.logic_chargeLutPointWeight_v[k,t] for k in b.vertex_chargeLut_s) \
+          + sum(b.energy_dischargeSoc_p[k]*b.logic_dischargeLutPointWeight_v[k,t] for k in b.vertex_dischargeLut_s)\
           + b.energy_socIdle_v[t]
         return b.energy_soc_v[t] == val
      
@@ -238,13 +238,13 @@ def create_block(b,g):
     # Determine if the battery is discharging       
     @b.Constraint(b.TIME_s)
     def discharge_calc(b,t):
-        val = sum(b.logic_dischargeLutStepSelection_v[k,t] for k in b.vertex_dischargeLut_s)
+        val = sum(b.logic_dischargeLutPointWeight_v[k,t] for k in b.vertex_dischargeLut_s)
         return b.logic_isDischarging_v[t] == val
         
     # Determine if the battery is charging  
     @b.Constraint(b.TIME_s)
     def charge_calc(b,t):
-        val = sum(b.logic_chargeLutStepSelection_v[k,t] for k in b.vertex_chargeLut_s)
+        val = sum(b.logic_chargeLutPointWeight_v[k,t] for k in b.vertex_chargeLut_s)
         return b.logic_isCharging_v[t] == val
     
     # Battery can either be charging, discharging or idle 

@@ -60,7 +60,7 @@ Users can edit default parameter values using the .yaml file (for an extended li
 
 The file "Main.py" contains the code to run a test file and display values of relevant variables.
 It includes:
-- routines for reading the input (either from .yaml files or an already consolidated .txt file containing the overall python dictionary describing input;
+- routines for reading the input (either from .yaml files or an already consolidated .txt file containing the overall python dictionary describing input);
 - Pyomo instance creation
 - Running the problem (Gurobi solver is needed to run the examples)
 - Examples of how to print the value of selected variables
