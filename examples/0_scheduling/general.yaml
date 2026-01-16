@@ -2,7 +2,6 @@ logic_schedulingReschedulingSelection_p: {null: 0}
 timesteps_p: {null: 96}
 timestep_size_p: {null: 0.25}
 timesteps_before_p: {null: 2}
-
 BESS_s: {null: [BESS_1]}
 POD_s: {null: [POD_1]}
 PDR_s: {null: [PDR_1]}

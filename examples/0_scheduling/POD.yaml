@@ -9,11 +9,9 @@ POD_b:
     cost_excise_p: {null: 0.0125}
     power_maxWithdrawnHeritage_p: {null: 0}
     power_maxWithdrawnFraction_p: {null: 0.5}
-
     power_sold_init_p: {null: 0}
     power_purchased_init_p: {null: 0}
-    
-  
+    logic_isPenaltyWithdrawnActive_p: {null: 0}
     logic_isExchangesLock_p:
       1: 0
       2: 1
@@ -111,7 +109,6 @@ POD_b:
       94: 1
       95: 1
       96: 1
-
     price_electricityPurchased_p:
       1: 0.06
       2: 0.06
@@ -209,7 +206,6 @@ POD_b:
       94: 0.07846
       95: 0.07846
       96: 0.07846
-    
     price_electricitySold_p:
       1: 0.06
       2: 0.06
@@ -307,5 +303,4 @@ POD_b:
       94: 0.07846
       95: 0.07846
       96: 0.07846
-    
     
