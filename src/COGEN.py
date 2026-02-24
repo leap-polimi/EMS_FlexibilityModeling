@@ -35,6 +35,7 @@ def create_block(b,g):
     b.TIME_s = Set(initialize=b.model().TIME_s) # CRITICAL -> we're referencing the parent model within the child model, BUT at least is decoupled
     b.TIME_before_s = Set(initialize=b.model().TIME_before_s)
     b.timestep_size_p = Param(initialize=b.model().timestep_size_p) # [hours] Duration of the timestep 
+    b.bigM_p = Param(initialize=b.model().bigM_p) 
 
     b.eff_pieces_p = Param(within=NonNegativeIntegers, default=5) #:param eff_pieces_p: number of pieces used for describing the CHP el. and th. efficiency curves
     b.eff_pieces_s = RangeSet(b.eff_pieces_p) # [1,2,3,...]
@@ -130,8 +131,8 @@ def create_block(b,g):
     
     b.cost_operationMaintenance_v = Var(within=NonNegativeReals) #:param cost_operationMaintenance_v: [€] Total cost for O&M incurred by the COGEN
     
-    b.power_capacityRetentionUp_v = Var(b.TIME_s,within=Reals) #:param power_capacityRetentionUp_v: [kW_el] Capacity Retention upwards available for the GENSET
-    b.power_capacityRetentionDown_v = Var(b.TIME_s,within=Reals) #:param power_capacityRetentionDown_v: [kW_el] Capacity Retention downwards available for the GENSET
+    b.power_capacityRetentionUp_v = Var(b.TIME_s,within=NonNegativeReals) #:param power_capacityRetentionUp_v: [kW_el] Capacity Retention upwards available for the GENSET
+    b.power_capacityRetentionDown_v = Var(b.TIME_s,within=NonNegativeReals) #:param power_capacityRetentionDown_v: [kW_el] Capacity Retention downwards available for the GENSET
     
     b.energy_NGforElectricity_v = Var(b.TIME_s,within=NonNegativeReals) #:param energy_NGforElectricity_v: [Sm3] NG used for electricity production
     
