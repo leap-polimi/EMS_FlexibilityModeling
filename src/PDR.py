@@ -7,6 +7,10 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
+Further development / modifications (fork):
+Copyright (C) 2024-2026 Andrea Scrocca and Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
+
 This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
@@ -33,7 +37,8 @@ def create_block(b,g):
     #.. section:: TIME-INDEPENDENT PARAMETERS
     b.cost_naturalGas_p= Param(within=NonNegativeReals) #:param cost_naturalGas_p: cost of natural gas per unit of standard cubic meter [€/Smc]
     b.LHV_p = Param(within=NonNegativeReals) #:param LHV_p: lower heating value of natural gas [kWh/Smc]
-    b.cost_networksObligations_p = Param(within=NonNegativeReals) #:param cost_networksObligations_p: cost of network obligation per unit of standard cubic meter [€/Smc]
+    b.cost_networksObligations_smc_p = Param(within=NonNegativeReals) #:param cost_networksObligations_smc_p: cost of network obligation per unit of standard cubic meter [€/Smc]
+    b.cost_networksObligations_fixed_p = Param(within=NonNegativeReals) #:param cost_networksObligations_fixed_p: cost of network obligation per day [€/day] (original obligation is per month)
     b.VAT_p = Param(within=NonNegativeReals) #:param VAT_p: VAT rate [p.u.]
     b.cost_exciseNG_p = Param(within=NonNegativeReals) #:param cost_exciseNG_p: [€/Smc] excise for NG not used to produce electricity
     b.cost_exciseEE_p = Param(within=NonNegativeReals) #:param cost_exciseEE_p: [€/Smc] excise for NG used to produce electricity      
@@ -46,20 +51,31 @@ def create_block(b,g):
     b.smc_ElectricityProduction_v = Var(b.TIME_s,within=NonNegativeReals) #:param smc_ElectricityProduction_v: [kWh_el] Electricity Production of units connected to the circuit  (TO BE CONSTRAINED OUTSIDE)    
     b.smc_OtherUses_v = Var(b.TIME_s, within=NonNegativeReals) #:param smc_OtherUses_v: [Smc] HELPER VARIABLE: calculate the fraction of NG consumption subject to NG excise
     
+    b.cost_gas_smc_v = Var(b.TIME_s, within=NonNegativeReals) #:var cost_gas_smc_v: [€] Expenditures for gas price variable component
+    b.cost_gas_excise_v = Var(b.TIME_s, within=NonNegativeReals) #:var cost_gas_excise_v: [€] Expenditures for gas excise
+
     #CONSTRAINTS
     
     @b.Constraint(b.TIME_s)
     def noCogen_calc(b,t):
         return b.smc_OtherUses_v[t] == b.smc_withdrawn_v[t] - b.smc_ElectricityProduction_v[t]
     
+    @b.Constraint(b.TIME_s)
+    def cost_gas_smc_calc(b,t):
+        return b.cost_gas_smc_v[t] == (b.cost_naturalGas_p + b.cost_networksObligations_smc_p)*b.smc_withdrawn_v[t]
+    
+    @b.Constraint(b.TIME_s)
+    def cost_gas_excise_calc(b,t): 
+        return b.cost_gas_excise_v[t] == b.cost_exciseNG_p*b.smc_OtherUses_v[t] + b.cost_exciseEE_p*b.smc_ElectricityProduction_v[t]
+    
     @b.Constraint()
     def bill_calc(b):
-        #Expenditures = (N_O + price)*total withdrawn natural gas +
-        #               natural gas not used for electricity production with applied NG excise +
-        #               natural gas used for elextricity production with applied EE excise
+        #Expenditures = (var_N_O + price)*total withdrawn natural gas +
+        #               ng excise cost +
+        #               fixed_N_O +
         #               + VAT
-        value = ((b.cost_networksObligations_p + b.cost_naturalGas_p)*sum(b.smc_withdrawn_v[t] for t in b.TIME_s) +\
-                sum(b.smc_OtherUses_v[t] for t in b.TIME_s)*b.cost_exciseNG_p +\
-                sum(b.smc_ElectricityProduction_v[t] for t in b.TIME_s)*b.cost_exciseEE_p)\
+        value = (sum(b.cost_gas_smc_v[t] for t in b.TIME_s) +\
+                sum(b.cost_gas_excise_v[t] for t in b.TIME_s) +\
+                b.cost_networksObligations_fixed_p )\
                 *(1+b.VAT_p) 
         return b.cost_total_v == value
