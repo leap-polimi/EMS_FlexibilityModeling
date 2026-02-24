@@ -124,6 +124,22 @@ def EL_CIRCUIT_b(b,c):
         value = sum(mod.EL_LOAD_b[l].power_electricityDemand_p[t] for l in b.CONNECTED_EL_LOAD_s)
         return mod.POD_b[u].power_electricityConsumption_v[t] == value
     
+    @b.Constraint(b.CONNECTED_POD_s,b.TIME_s)
+    def powerProductionLink(b,u,t):
+        value = sum(mod.COGEN_b[u].power_electricityOutput_v[t] for u in b.CONNECTED_COGEN_s) \
+            + sum(mod.PV_b[p].power_electricityOutput_v[t] for p in b.CONNECTED_PV_s) 
+        return mod.POD_b[u].power_electricityProduction_v[t] == value
+    
+    @b.Constraint(b.CONNECTED_POD_s,b.TIME_s)
+    def PowerChargeLink(b,u,t):
+        value = sum(mod.BESS_b[e].power_chargeAC_v[t]*mod.BESS_b[e].power_nominal_p for e in b.CONNECTED_BESS_s)
+        return mod.POD_b[u].power_charge_v[t] == value
+    
+    @b.Constraint(b.CONNECTED_POD_s,b.TIME_s)
+    def PowerDischargeLink(b,u,t):
+        value = sum(mod.BESS_b[e].power_dischargeAC_v[t]*mod.BESS_b[e].power_nominal_p for e in b.CONNECTED_BESS_s)
+        return mod.POD_b[u].power_discharge_v[t] == value
+    
     # pass temperature to the BESS
     @b.Constraint(b.CONNECTED_BESS_s,b.TIME_s)
     def temperatureLink(b,u,t):
