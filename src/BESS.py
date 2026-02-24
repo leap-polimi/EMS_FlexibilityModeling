@@ -7,6 +7,10 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
+Further development / modifications (fork):
+Copyright (C) 2024-2026 Andrea Scrocca and Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
+
 This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
@@ -60,6 +64,10 @@ def create_block(b,g):
     b.energy_socMin_p = Param(within=NonNegativeReals, default=0) # :param energy_socMin_p: [pu] minimum State of Charge, in terms of per-unit of nominal energy
     b.energy_socMax_p = Param(within=NonNegativeReals, default=1) # :param energy_socMax_p: [pu] maximum State of Charge, in terms of per-unit of nominal energy
     
+    # For improving CR reliability it is possible to impose more stringent limits on the SOC
+    b.energy_socMinCR_p = Param(within=NonNegativeReals, default=0) # :param energy_socMinCR_p: [pu] minimum State of Charge for CR, in terms of per-unit of nominal energy
+    b.energy_socMaxCR_p = Param(within=NonNegativeReals, default=1) # :param energy_socMaxCR_p: [pu] maximum State of Charge for CR, in terms of per-unit of nominal energy
+    
     # auxiliaries calculation
     b.auxiliaries_gamma1_p = Param(within=NonNegativeReals, default=25.5) # :param auxiliaries_gamma1_p: 
     b.auxiliaries_gamma2_p = Param(within=NonNegativeReals, default=38) # :param auxiliaries_gamma2_p: 
@@ -105,7 +113,8 @@ def create_block(b,g):
     
     b.energy_socFirstTimestep_p = Param(within=NonNegativeReals, default=0.5) # :param energy_socFirstTimestep_p: [pu] SOC at the beginning of first timestep, as per-unit of the nominal energy
     b.energy_socLastTimestep_p = Param(within=NonNegativeReals, default=0.5) # :param energy_socLastTimestep_p: [pu] SOC at the end of the last timestep, as per-unit of the nominal energy
-    
+    b.logic_isLastSoc_enforced_p = Param(within=Binary, default=0) # :param logic_isLastSoc_enforced_p: [0/1] 1 = enforce SOC at the end of the last timestep; 0 = do not enforce SOC at the end of the last timestep
+
     @b.Param(b.TIME_before_s, within=NonNegativeReals) # :param energy_before_p: [kW_el] energy content of the BESS outside optimization window
     def energy_before_p(b,t):
         return b.energy_socFirstTimestep_p*b.energy_nominal_p  
@@ -116,6 +125,7 @@ def create_block(b,g):
     
     b.cost_minRevenuesCycle_p = Param(within=NonNegativeReals) #:param cost_minRevenuesCycle_p: [€/cycle] cost for each cycle of the BESS
     b.cost_operationMaintenanceEnergy_p = Param(within=NonNegativeReals) #:param cost_operationMaintenanceEnergy_p: [€/kWh] O&M of the battery
+    
     # .. section:: TIME-DEPENDENT PARAMETERS
     
     b.timestep_endOfTauUp_p = Param(b.TIME_s, within=NonNegativeIntegers) # :param timestep_endOfTauUp_p: [-] timesteps for upwards capacity retention windows; 
@@ -166,8 +176,8 @@ def create_block(b,g):
     b.power_virtualCapacityRetentionUp_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_virtualCapacityRetentionUp_v: [kW] power available for capacity retention upward during discharge phase
     b.power_virtualCapacityRetentionDown_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_virtualCapacityRetentionDown_v: [kW] power available for capacity retention downward during charge phase
     
-    b.power_capacityRetentionUp_v = Var(b.TIME_s, within=Reals) # :param power_capacityRetentionUp_v: [kW] power available for Capacity Retention (AC side)
-    b.power_capacityRetentionDown_v = Var(b.TIME_s, within=Reals) # :param power_capacityRetentionDown_v: [kW] power available for Capacity Retention (AC side)
+    b.power_capacityRetentionUp_v = Var(b.TIME_s, within=NonNegativeReals) # :param power_capacityRetentionUp_v: [kW] power available for Capacity Retention (AC side)
+    b.power_capacityRetentionDown_v = Var(b.TIME_s, within=NonNegativeReals) # :param power_capacityRetentionDown_v: [kW] power available for Capacity Retention (AC side)
       
     # slack handling in controllability constraints
     b.energy_slackSoc_v = Var(b.TIME_s, within=NonNegativeReals) #:param energy_slackSoc_v: [pu] slack variable for SOC controllability
@@ -187,6 +197,7 @@ def create_block(b,g):
     
     b.cost_operationMaintenance_v = Var(within=NonNegativeReals) #:param cost_operationMaintenance_v: [€] Total cost for O&M incurred by the BESS
     b.cost_minRevenuesCycle_v = Var(within=NonNegativeReals) #:param cost_minRevenuesCycle_v: [€] Tpenalty for cycling the battery
+    
     # CONSTRAINTS
    
     # Power discharged - DC side 
@@ -268,10 +279,13 @@ def create_block(b,g):
               + (b.power_chargeDC_v[t] - b.power_dischargeDC_v[t])*b.power_nominal_p*b.timestep_size_p
         return b.energy_v[t] == val
     
-    # Energy at the end of day
+    # Energy at the end of day (can be left free for multiple days simulation)
     @b.Constraint()
     def energy_endOfDay(b):
-        return b.energy_v[b.TIME_s.last()] == b.energy_socLastTimestep_p*b.energy_nominal_p
+        if b.logic_isLastSoc_enforced_p == 1:
+            return b.energy_v[b.TIME_s.last()] == b.energy_socLastTimestep_p*b.energy_nominal_p
+        else:
+            return Constraint.Skip
     
     
     # Capability curve - Step selection during charge
@@ -368,7 +382,7 @@ def create_block(b,g):
                 prev_soc = b.energy_soc_v[b.TIME_s.prev(t)]
             
             return sum(b.power_virtualCapacityRetentionUp_v[tau]*b.timestep_size_p + b.power_nominal_p*b.power_dischargeAC_v[tau]*b.timestep_size_p for tau in range(t,b.timestep_endOfTauUp_p[t])) \
-                <= (prev_soc - b.energy_socMin_p.value)*b.energy_nominal_p.value*b.efficiency_mean_p.value
+                <= (prev_soc - b.energy_socMinCR_p.value)*b.energy_nominal_p.value*b.efficiency_mean_p.value
         else:
             return Constraint.Skip
         
@@ -387,7 +401,7 @@ def create_block(b,g):
             else:
                 prev_soc = b.energy_soc_v[b.TIME_s.prev(t)]
             return sum(b.power_virtualCapacityRetentionDown_v[tau]*b.timestep_size_p + b.power_nominal_p*b.power_chargeAC_v[tau]*b.timestep_size_p for tau in range(t,b.timestep_endOfTauDown_p[t])) \
-                <= (b.energy_socMax_p - prev_soc)*b.energy_nominal_p
+                <= (b.energy_socMaxCR_p - prev_soc)*b.energy_nominal_p
         else:
             return Constraint.Skip
         
