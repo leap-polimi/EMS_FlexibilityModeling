@@ -39,6 +39,7 @@ def create_block(b,g):
     b.logic_schedulingReschedulingSelection_p = Param(initialize=b.model().logic_schedulingReschedulingSelection_p)
     # b.costant_penalty_p = Param(initialize=b.model().costant_penalty_p)
     b.costant_penalty_p = Param(initialize=1.0) #:param costant_penalty_p: constant penalty to scale penalties in the objective function
+    b.logic_rescheduling_localGlobalSelection_p = Param(initialize=b.model().logic_rescheduling_localGlobalSelection_p)
     
     #..section:: ELECTRICAL BILL COMPONENTS
     # [€/kWh] components
@@ -176,7 +177,7 @@ def create_block(b,g):
     # Energy can be sold OR purchased
     @b.Constraint(b.TIME_s)                                                  
     def commercial_dicotomy_1(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return b.power_electricityPurchased_v[t] <= b.logic_isPurchasing_v[t] * b.bigM_p
         else:
             return b.power_electricityPurchased_v[t] <= b.logic_isPurchasing_v[t] * b.logic_IDM_p[t] * b.bigM_p
@@ -184,7 +185,7 @@ def create_block(b,g):
 
     @b.Constraint(b.TIME_s)                                                  
     def commercial_dicotomy_2(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return b.power_electricitySold_v[t] <= (1 - b.logic_isPurchasing_v[t]) * b.bigM_p
         else:
             return b.power_electricitySold_v[t] <= (1 - b.logic_isPurchasing_v[t]) * b.logic_IDM_p[t] * b.bigM_p
@@ -192,14 +193,14 @@ def create_block(b,g):
         # imbalance exchange
     @b.Constraint(b.TIME_s)
     def negative_imbalance_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.imbalance_negative_v[t] <= b.logic_isImbalanceNegative_v[t] * (1 - b.logic_IDM_p[t]) * b.bigM_p # [kWel]
    
     @b.Constraint(b.TIME_s)
     def positive_imbalance_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:   
             return b.imbalance_positive_v[t] <= (1 - b.logic_isImbalanceNegative_v[t]) * (1 - b.logic_IDM_p[t])  * b.bigM_p # [kWel]
@@ -209,56 +210,56 @@ def create_block(b,g):
     #        - no positive unbalance if downward BDE is active
     @b.Constraint(b.TIME_s)
     def MROD_UP_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.power_electricityPurchased_v[t] <= (1-b.logicBDE_Up_v[t]) * b.bigM_p
     
     @b.Constraint(b.TIME_s)
     def MROD_DW_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.power_electricitySold_v[t] <= (1-b.logicBDE_Down_v[t]) * b.bigM_p
         
     @b.Constraint(b.TIME_s)
     def MROD_IMB_UP_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.imbalance_negative_v[t] <= (1-b.logicBDE_Up_v[t]) * b.bigM_p
     
     @b.Constraint(b.TIME_s)
     def MROD_IMB_DW_def(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.imbalance_positive_v[t] <= (1-b.logicBDE_Down_v[t]) * b.bigM_p
     
     @b.Constraint(b.TIME_s)
     def MROD_UPdicotomy_1(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.logicBDE_Up_v[t] <= b.BDE_Up_v[t]
     
     @b.Constraint(b.TIME_s)
     def MROD_UPdicotomy_2(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.logicBDE_Up_v[t] * b.bigM_p >= b.BDE_Up_v[t] 
     
     @b.Constraint(b.TIME_s)
     def MROD_DWdicotomy_1(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.logicBDE_Down_v[t] <= b.BDE_Down_v[t]
     
     @b.Constraint(b.TIME_s)
     def MROD_DWdicotomy_2(b,t):
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return Constraint.Skip
         else:
             return b.logicBDE_Down_v[t] * b.bigM_p >= b.BDE_Down_v[t]
@@ -268,7 +269,7 @@ def create_block(b,g):
     def energy_exchanges(b,t):
         physical = b.power_electricityWithdrawn_v[t] - b.power_electricityInjected_v[t]
         commercial = b.power_electricityPurchased_v[t]- b.power_electricitySold_v[t] 
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             ancillary = 0 
             reference_program = 0
             imbalance = 0 
@@ -308,9 +309,13 @@ def create_block(b,g):
     # [€/kWh] components    
     @b.Constraint(b.TIME_s)
     def cost_electricity_supply_calc(b,t):
-        value = b.cost_energySupply_p[t]*(b.power_electricityWithdrawn_v[t]-b.power_chargeInjectedNegative_v[t])*b.timestep_size_p + \
-                b.cost_energySupply_p[t]*(b.power_electricityWithdrawn_v[t]-b.power_chargeInjectedNegative_v[t])*b.timestep_size_p*b.power_gridLossesMT_p + \
-                b.price_electricityPurchased_p[t]*b.power_chargeInjectedNegative_v[t]*b.timestep_size_p 
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
+            value = b.cost_energySupply_p[t]*(b.power_electricityWithdrawn_v[t]-b.power_chargeInjectedNegative_v[t])*b.timestep_size_p + \
+                    b.cost_energySupply_p[t]*(b.power_electricityWithdrawn_v[t]-b.power_chargeInjectedNegative_v[t])*b.timestep_size_p*b.power_gridLossesMT_p + \
+                    b.price_electricityPurchased_p[t]*b.power_chargeInjectedNegative_v[t]*b.timestep_size_p 
+        else: # Global rescheduling: the purchased energy is valued at the IDM energy price
+            value = b.price_electricityPurchased_p[t]*b.power_electricityPurchased_v[t]*b.timestep_size_p + \
+                    b.price_electricityPurchased_p[t]*b.power_electricityWithdrawn_v[t]*b.timestep_size_p*b.power_gridLossesMT_p 
         return b.cost_electricity_supply_v[t] == value
     
     @b.Constraint(b.TIME_s)
@@ -405,7 +410,7 @@ def create_block(b,g):
      
     @b.Constraint()
     def Imbalance_penalty(b): #avoid the system to imbalance the grid
-        if b.logic_schedulingReschedulingSelection_p == 0:
+        if b.logic_schedulingReschedulingSelection_p == 0 or b.logic_rescheduling_localGlobalSelection_p==0:
             return b.penalty_imbalance_v == 0
         else:
             tot_imbalance = sum((b.imbalance_positive_v[t]\
