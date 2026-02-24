@@ -7,6 +7,10 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
+Further development / modifications (fork):
+Copyright (C) 2024-2026 Andrea Scrocca and Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
+
 This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
@@ -31,6 +35,9 @@ def create_block(b,g):
     b.TIME_s = Set(initialize=b.model().TIME_s) # CRITICAL -> we're referencing the parent model within the child model, BUT at least is decoupled
     b.TIME_before_s = Set(initialize=b.model().TIME_before_s)
     b.timestep_size_p = Param(initialize=b.model().timestep_size_p) # [hours] Duration of the timestep 
+
+    b.eff_pieces_p = Param(within=NonNegativeIntegers, default=5) #:param eff_pieces_p: number of pieces used for describing the CHP el. and th. efficiency curves
+    b.eff_pieces_s = RangeSet(b.eff_pieces_p) # [1,2,3,...]
     
     @b.Param()
     def timesteps_before_p(b):
@@ -40,10 +47,26 @@ def create_block(b,g):
     b.power_electricityNominal_p = Param(within=NonNegativeReals) #:param power_electricityNominal_p: Nominal power of the COGEN (output) [kWel]
     b.power_electricityMin_p = Param(within=NonNegativeReals) #:param power_electricityMin_p: Minimum Load (electricity) for the COGEN, expressed as p.u. of power_electricityNominal_p [pu]
     b.power_electricityMax_p = Param(within=NonNegativeReals) #:param :Maximum Load (electricity)for the COGEN, expressed as p.u. of power_heatNominal_p [pu]
-    b.efficiency_electricitySlope_p = Param(within=Reals) #:param efficiency_electricitySlope_p: Slope term for part-load output calculation
-    b.efficiency_electricityIntercept_p = Param(within=Reals) #:param efficiency_electricityIntercept_p: Intercept term for part-load output calculation
-    b.efficiency_heatSlope_p = Param(within=Reals) #:param efficiency_heatSlope_p: Slope term for part-load output calculation
-    b.efficiency_heatIntercept_p = Param(within=Reals) #:param efficiency_heatIntercept_p: Intercept term for part-load output calculation
+    
+    #Piecewise linearization of the electrical efficiency (5 'pieces')
+    b.efficiency_electricitySlope_p = Param(b.eff_pieces_s, within=Reals) #:param efficiency_electricitySlope_p: Slope term for part-load output calculation
+    b.efficiency_electricityIntercept_p = Param(b.eff_pieces_s, within=Reals) #:param efficiency_electricityIntercept_p: Intercept term for part-load output calculation
+
+    #Piecewise linearization of the heat efficiency (5 'pieces')
+    b.efficiency_heatSlope_p = Param(b.eff_pieces_s, within=Reals) #:param efficiency_heatSlope_p: Slope term for part-load output calculation
+    b.efficiency_heatIntercept_p = Param(b.eff_pieces_s, within=Reals) #:param efficiency_heatIntercept_p: Intercept term for part-load output calculation
+
+    b.fuelInputLowerBound_p = Param(b.eff_pieces_s, within=NonNegativeReals) #:param fuelInputLowerBound_p: [kW] Lower value of the fuelInput-interval selected for the efficiency curves approx
+    b.fuelInputUpperBound_p = Param(b.eff_pieces_s, within=NonNegativeReals) #:param fuelInputUpperBound_p: [kW] Upper value of the fuelInput-interval selected for the efficiency curves approx
+
+    b.logic_isPiecewiseEfficiency_p = Param(within= Binary, default=0) #:param logic_isPiecewiseEfficiency_p: [-] Binary parameter indicating if we are using the piecewise efficiency curve
+
+    # Single linearization of the efficiency curves (1 piece)
+    b.efficiency_electricitySlope_simple_p = Param(within=Reals) #:param efficiency_electricitySlope_p: Slope term for part-load output calculation
+    b.efficiency_electricityIntercept_simple_p = Param(within=Reals) #:param efficiency_electricityIntercept_p: Intercept term for part-load output calculation
+    b.efficiency_heatSlope_simple_p = Param(within=Reals) #:param efficiency_electricitySlope_p: Slope term for part-load output calculation
+    b.efficiency_heatIntercept_simple_p = Param(within=Reals) #:param efficiency_electricityIntercept_p: Intercept term for part-load output calculation
+
     b.power_electricityRampUp_p = Param(within=NonNegativeReals) #:param power_electricityRampUp_p: Max ramp-up in the timestep in terms of per-unit of output power (electricity) [pu]
     b.power_electricityRampDown_p = Param(within=NonNegativeReals) #:param power_electricityRampDown_p:Max ramp-down in the timestep in terms of per-unit of output power (electricity) [pu]
     b.power_electricityStartUp_p = Param(within=NonNegativeReals) #:param power_electricityStartUp_p: [pu] Max power output after the end of start-up procedure  NB: In slow-machine this parameter should be equal to 0
@@ -95,6 +118,8 @@ def create_block(b,g):
     b.power_fuelInput_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_fuelInput_v: [kW_fuel] Input of the COGEN, in terms of mean power input in the timestep
     b.power_heatOutput_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_heatOutput_v: [kW_th] Output of the COGEN (heat), in terms of mean power output in the timestep
     b.power_electricityOutput_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_electricityOutput_v: [kW_el] Output of the COGEN (electricity), in terms of mean power output in the timestep
+
+    b.logic_efficiencySelection_v = Var(b.TIME_s, b.eff_pieces_s, within=Binary) #:var logic_efficiencySelection: =1 to select a specific piece of the efficiency curves
     
     b.power_electricityActual_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_electricityActual_v: [kW_el] HELPER VAR - Actual output that can be supplied by the COGEN (e.g. 0 if is not on)
     b.power_heatActual_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_heatActual_v: [kW_th] HELPER VAR - Actual output that can be supplied by the COGEN (e.g. 0 if is not on)
@@ -128,13 +153,38 @@ def create_block(b,g):
     
     @b.Constraint(b.TIME_s)
     def Cogen_electricityProduction(b,t):
-        # output = m*input + q
-        return b.power_electricityOutput_v[t] == b.efficiency_electricitySlope_p*b.power_fuelInput_v[t]+b.efficiency_electricityIntercept_p*b.logic_isOn_v[t]
+        if b.logic_isPiecewiseEfficiency_p == 0:
+            return b.power_electricityOutput_v[t] == b.efficiency_electricitySlope_simple_p*b.power_fuelInput_v[t]+b.efficiency_electricityIntercept_simple_p*b.logic_isOn_v[t]
+        else:
+            return b.power_electricityOutput_v[t] == sum((b.efficiency_electricitySlope_p[p]*b.power_fuelInput_v[t]+b.efficiency_electricityIntercept_p[p]*b.logic_isOn_v[t])*b.logic_efficiencySelection_v[t,p] for p in b.eff_pieces_s)
     
     @b.Constraint(b.TIME_s)
     def Cogen_heatProduction(b,t):
-        # output = m*input + q
-        return b.power_heatOutput_v[t] == b.efficiency_heatSlope_p*b.power_fuelInput_v[t]+b.efficiency_heatIntercept_p*b.logic_isOn_v[t]
+        if b.logic_isPiecewiseEfficiency_p == 0:
+            return b.power_heatOutput_v[t] == b.efficiency_heatSlope_simple_p*b.power_fuelInput_v[t]+b.efficiency_heatIntercept_simple_p*b.logic_isOn_v[t]
+        else:
+            return b.power_heatOutput_v[t] == sum((b.efficiency_heatSlope_p[p]*b.power_fuelInput_v[t]+b.efficiency_heatIntercept_p[p]*b.logic_isOn_v[t])*b.logic_efficiencySelection_v[t,p] for p in b.eff_pieces_s)
+        
+    @b.Constraint(b.TIME_s)
+    def Cogen_efficiency_Selection(b,t):
+        if b.logic_isPiecewiseEfficiency_p == 0:
+            return Constraint.Skip
+        else:
+            return sum(b.logic_efficiencySelection_v[t,p] for p in b.eff_pieces_s) == 1
+    
+    @b.Constraint(b.TIME_s, b.eff_pieces_s)
+    def Cogen_EfficiencySelection_Lower(b, t, p):
+        if b.logic_isPiecewiseEfficiency_p == 0:
+            return Constraint.Skip
+        else:
+            return b.power_fuelInput_v[t] >= b.fuelInputLowerBound_p[p] - b.bigM_p * (1 - b.logic_efficiencySelection_v[t, p])
+
+    @b.Constraint(b.TIME_s, b.eff_pieces_s)
+    def Cogen_EfficiencySelection_Upper(b, t, p):
+        if b.logic_isPiecewiseEfficiency_p == 0:
+            return Constraint.Skip
+        else:
+            return b.power_fuelInput_v[t] <= b.fuelInputUpperBound_p[p] + b.bigM_p * (1 - b.logic_efficiencySelection_v[t, p])
 
     # OUTPUT is constrained by technical max load and min load
     @b.Constraint(b.TIME_s)
