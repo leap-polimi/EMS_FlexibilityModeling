@@ -273,10 +273,10 @@ def create_block(b,g):
     @b.Constraint(b.TIME_s)
     def Cogen_minimum_uptime(b,t):
         if b.logic_is_available_p[t] == 1 :
-            if t <= b.timesteps_minimumTimeOn_p+1:
+            if t <= b.timesteps_minimumTimeOn_p:
                 value = \
                     sum(b.logic_isOn_v[tau] for tau in range(1,t)) \
-                        + sum(b.logic_isOn_before_p[tau_neg] for tau_neg in range(-b.timesteps_minimumTimeOn_p+t-1,1))    
+                        + sum(b.logic_isOn_before_p[tau_neg] for tau_neg in range(-b.timesteps_minimumTimeOn_p+t,1))    
             else:
                 value = sum(b.logic_isOn_v[tau] for tau in range(t-b.timesteps_minimumTimeOn_p,t))
             
