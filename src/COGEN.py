@@ -112,7 +112,7 @@ def create_block(b,g):
     b.power_setpointheatOutput_p = Param (b.TIME_s, within=NonNegativeReals, default=0.0) #:param power_setpointheatOutput_p: [kW] if not controllable, this parameters set the thermal power of the machine
     b.power_setpointElectricityOutput_p = Param (b.TIME_s, within=NonNegativeReals, default=0.0) #:param power_setpointElectricityOutput_p: [kW] if not controllable, this parameters set the electrical power of the machine
     
-    b.logic_isAsmAllowed_p = Param (b.TIME_s, within = Binary, default=1) #:param logic_isAsmAllowed_p: [1] device is allowed to participate into ASM 
+    b.logic_isCRAllowed_p = Param (b.TIME_s, within = Binary, default=1) #:param logic_isCRAllowed_p: [1] device is allowed to participate into CR programs 
     
     #.. section:: VARS
     b.power_fuelInput_v = Var(b.TIME_s, within=NonNegativeReals) #:param power_fuelInput_v: [kW_fuel] Input of the COGEN, in terms of mean power input in the timestep
@@ -319,15 +319,15 @@ def create_block(b,g):
             return Constraint.Skip
 
     @b.Constraint(b.TIME_s)
-    def ASM_allowed_UP(b,t):
-        if b.logic_isAsmAllowed_p[t] == 0:
+    def CR_allowed_UP(b,t):
+        if b.logic_isCRAllowed_p[t] == 0:
             return b.power_capacityRetentionUp_v[t] == 0
         else:
             return Constraint.Skip
         
     @b.Constraint(b.TIME_s)
-    def ASM_allowed_DOWN(b,t):
-        if b.logic_isAsmAllowed_p[t] == 0:
+    def CR_allowed_DOWN(b,t):
+        if b.logic_isCRAllowed_p[t] == 0:
             return b.power_capacityRetentionDown_v[t] == 0
         else:
             return Constraint.Skip
