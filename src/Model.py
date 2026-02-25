@@ -380,14 +380,14 @@ def FLEX_b(b, c):
     
     @b.Constraint(b.TIME_s)
     def power_capacityRetentionUp_calc2(b,t):
-        if b.logic_is_capacityRetention_Optimized_p == 0 and b.power_Scheduled_capacityRetentionUp_p[t]>0: #CR is a scheduled parameter
+        if b.logic_is_capacityRetention_Optimized_p == 0 and b.power_scheduled_capacityRetentionUp_p[t]>0: #CR is a scheduled parameter
             if mod.logic_schedulingReschedulingSelection_p == 0: #Scheduling
-                return b.power_capacityRetentionUp_v[t] == b.power_Scheduled_capacityRetentionUp_p[t]
+                return b.power_capacityRetentionUp_v[t] == b.power_scheduled_capacityRetentionUp_p[t]
             else: #Rescheduling
                 if mod.logic_rescheduling_localGlobalSelection_p==1: #Global rescheduling
-                    return b.power_capacityRetentionUp_v[t] == b.power_Scheduled_capacityRetentionUp_p[t] - b.global_dispatchingUp_p[t]
+                    return b.power_capacityRetentionUp_v[t] == b.power_scheduled_capacityRetentionUp_p[t] - b.global_dispatchingUp_p[t]
                 else: #Local rescheduling
-                    return b.power_capacityRetentionUp_v[t] == b.power_Scheduled_capacityRetentionUp_p[t] - b.local_dispatchingUp_p[t]
+                    return b.power_capacityRetentionUp_v[t] == b.power_scheduled_capacityRetentionUp_p[t] - b.local_dispatchingUp_p[t]
         else:
             return Constraint.Skip
         
@@ -399,14 +399,14 @@ def FLEX_b(b, c):
     
     @b.Constraint(b.TIME_s)
     def power_capacityRetentionDown_calc2(b,t):
-        if b.logic_is_capacityRetention_Optimized_p ==0 and b.power_Scheduled_capacityRetentionDown_p[t]>0: #CR is a scheduled parameter
+        if b.logic_is_capacityRetention_Optimized_p ==0 and b.power_scheduled_capacityRetentionDown_p[t]>0: #CR is a scheduled parameter
             if mod.logic_schedulingReschedulingSelection_p == 0: #Scheduling
-                return b.power_capacityRetentionDown_v[t] == b.power_Scheduled_capacityRetentionDown_p[t]
+                return b.power_capacityRetentionDown_v[t] == b.power_scheduled_capacityRetentionDown_p[t]
             else: #Rescheduling
                 if mod.logic_rescheduling_localGlobalSelection_p==1: #Global rescheduling
-                    return b.power_capacityRetentionDown_v[t] == b.power_Scheduled_capacityRetentionDown_p[t] - b.global_dispatchingDown_p[t]
+                    return b.power_capacityRetentionDown_v[t] == b.power_scheduled_capacityRetentionDown_p[t] - b.global_dispatchingDown_p[t]
                 else: #Local rescheduling
-                    return b.power_capacityRetentionDown_v[t] == b.power_Scheduled_capacityRetentionDown_p[t] - b.local_dispatchingDown_p[t]
+                    return b.power_capacityRetentionDown_v[t] == b.power_scheduled_capacityRetentionDown_p[t] - b.local_dispatchingDown_p[t]
         else:
             return Constraint.Skip  
         
@@ -456,7 +456,7 @@ def FLEX_b(b, c):
                 + b.power_capacityRetentionUp_v[t])*b.y_isflexUpReserved_v[t]
             else:
                 return b.power_flexUp_v[t] == 0
-        elif mod.logic_schedulingReschedulingSelection_p == 1 and b.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
+        elif mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
             if b.local_dispatchingUp_p[t]>0:
                 return b.power_FlexActivatedUp_v[t] <= \
                     (b.baseline_p[t] \
@@ -468,7 +468,7 @@ def FLEX_b(b, c):
         
     @b.Constraint(b.TIME_s)
     def FlexUp_calc2(b,t):
-        if mod.logic_schedulingReschedulingSelection_p == 1 and b.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
+        if mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
             if b.local_dispatchingUp_p[t]>0:
                 return b.power_FlexActivatedUp_v[t] >= \
                     b.local_dispatchingUp_p[t] - b.power_localFlex_slackUp_v[t]
@@ -487,7 +487,7 @@ def FLEX_b(b, c):
                 + b.power_capacityRetentionDown_v[t])*b.y_isflexDownReserved_v[t]
             else:
                 return b.power_flexDown_v[t] == 0
-        elif mod.logic_schedulingReschedulingSelection_p == 1 and b.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
+        elif mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
             if b.local_dispatchingDown_p[t]>0:
                 return b.power_FlexActivatedDown_v[t] <= \
                     (- b.baseline_p[t] \
@@ -499,7 +499,7 @@ def FLEX_b(b, c):
     
     @b.Constraint(b.TIME_s)
     def FlexDown_calc2(b,t):
-        if mod.logic_schedulingReschedulingSelection_p == 1 and b.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
+        if mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p==0: #Rescheduling and local flex provision
             if b.local_dispatchingDown_p[t]>0:
                 return b.power_FlexActivatedDown_v[t] >= \
                     b.local_dispatchingDown_p[t] - b.power_localFlex_slackDown_v[t]
@@ -578,7 +578,7 @@ def FLEX_b(b, c):
             return b.revenue_flexUp_v == sum(b.price_availability_flexUp_p[t]*b.power_flexUp_daily_v*b.logic_isflexUpRequested_p[t] for t in b.TIME_s) + \
                 sum(b.price_utilisation_flexUp_p[t]/4*b.power_FlexActivatedUp_v[t] for t in b.TIME_s)
         elif mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p == 0:
-            return b.revenue_flexUp_v == sum(b.price_availability_flexUp_p[t]*b.power_Scheduled_capacityRetentionUp_p[t] for t in b.TIME_s) + \
+            return b.revenue_flexUp_v == sum(b.price_availability_flexUp_p[t]*b.power_scheduled_capacityRetentionUp_p[t] for t in b.TIME_s) + \
                 sum(b.price_utilisation_flexUp_p[t]/4*b.local_dispatchingUp_p[t] for t in b.TIME_s) + \
                 -sum(b.penalty_localFlex_slackUp_p[t]/4*b.power_localFlex_slackUp_v[t] for t in b.TIME_s)
         else:
@@ -590,7 +590,7 @@ def FLEX_b(b, c):
             return b.revenue_flexDown_v == sum(b.price_availability_flexDown_p[t]*b.power_flexDown_daily_v*b.logic_isflexDownRequested_p[t] for t in b.TIME_s) + \
                 sum(b.price_utilisation_flexDown_p[t]/4*b.power_FlexActivatedDown_v[t] for t in b.TIME_s) 
         elif mod.logic_schedulingReschedulingSelection_p == 1 and mod.logic_rescheduling_localGlobalSelection_p == 0:
-            return b.revenue_flexDown_v == sum(b.price_availability_flexDown_p[t]*b.power_Scheduled_capacityRetentionDown_p[t] for t in b.TIME_s) + \
+            return b.revenue_flexDown_v == sum(b.price_availability_flexDown_p[t]*b.power_scheduled_capacityRetentionDown_p[t] for t in b.TIME_s) + \
                 sum(b.price_utilisation_flexDown_p[t]/4*b.local_dispatchingDown_p[t] for t in b.TIME_s) + \
                 -sum(b.penalty_localFlex_slackDown_p[t]/4*b.power_localFlex_slackDown_v[t] for t in b.TIME_s)
         else:

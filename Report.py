@@ -56,7 +56,7 @@ def save_results(b, name, folder):
     return (time_indexed, static)
 
 TEST_FOLDER = 'examples'
-TEST_SELECTION  = '0_scheduling_FLEX'
+TEST_SELECTION  = '0_rescheduling_FLEX'
 draw_graphs=True
 print_report=True
 

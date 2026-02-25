@@ -196,7 +196,7 @@ def create_reportEL(b,name,folder):
        my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]
        
 
-    if b.model().logic_schedulingReschedulingSelection_p==1:       
+    if b.model().logic_schedulingReschedulingSelection_p==1 and b.model().logic_rescheduling_localGlobalSelection_p==1:       
         for p in b.CONNECTED_POD_s:
             EL_IN=[pyo.value(b.model().POD_b[p].BDE_Down_v[t]) for t in b.TIME_s]
             fig.add_trace(go.Scatter(
@@ -423,75 +423,199 @@ def create_reportFLEX(b,name,folder):
     xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
 
     time = [t for t in b.TIME_s]
+
+    # Safe numeric extraction: return 0 if a Var is uninitialized
+    def _v(expr, default=0.0):
+        val = pyo.value(expr, exception=False)
+        return default if val is None else float(val)
     
     # Create subplots with a shared x-axis
     fig = make_subplots(
-        rows=2, cols=1,  # Two rows, one column
+        rows=3, cols=1,  # Three rows, one column
         shared_xaxes=True,  # Share the x-axis
         vertical_spacing=0.1,  # Space between subplots
-        subplot_titles=("Flex UP breakdown", "Baseline and real Exchange")
+        subplot_titles=("Capacity Retention breakdown", "Baseline and real Exchange", "Dispatched vs Provided Flexibility")
     )
-    
-    FLEX_UP = [pyo.value(b.model().FLEX_b["FLEX_1"].power_flexUp_v[t]) for t in b.TIME_s]
-    fig.add_trace(go.Scatter(
-        x = time,
-        y = FLEX_UP,
-        name = f'Provided Upward Flexibility [kW]',
-        opacity = .5,
-        hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP]),
-        row=1,
-        col=1) 
-    
-    POD=[pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t])-pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
-    fig.add_trace(go.Scatter(
-        x = time,
-        y = POD,
-        name = f'(Baseline - Real_POD) [kW]',
-        opacity = .5,
-        hovertext= ['Value: {:.2f}'.format(val) for val in POD]),
-        row=1,
-        col=1)
 
-    my_base = [0 for t in b.TIME_s]        
-
-    for e in b.FLEX_BESS_s:
-        BESS_CR=[pyo.value(b.model().BESS_b[e].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
-        fig.add_trace(go.Bar(
+    if b.model().logic_schedulingReschedulingSelection_p==0 and b.model().FLEX_b["FLEX_1"].logic_is_capacityRetention_Optimized_p==1:
+        FLEX_UP = [pyo.value(b.model().FLEX_b["FLEX_1"].power_flexUp_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(
             x = time,
-            y = BESS_CR,
-            base = my_base,
-            name = f'BESS CR [kW]',
+            y = FLEX_UP,
+            name = f'Provided Upward Flexibility [kW]',
             opacity = .5,
-            hovertext= ['Value: {:.2f}'.format(val) for val in BESS_CR],
-            offsetgroup = 0),
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP]),
             row=1,
-            col=1)
-        my_base = [my_base[t-1] + BESS_CR[t-1] for t in b.TIME_s]
-    
-    for g in b.FLEX_COGEN_s:
-        COGEN_CR=[pyo.value(b.model().COGEN_b[g].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
-        fig.add_trace(go.Bar(
-            x = time,
-            y = COGEN_CR,
-            base = my_base,
-            name = f'CHP CR [kW]',
-            opacity = .5,
-            hovertext= ['Value: {:.2f}'.format(val) for val in COGEN_CR],
-            offsetgroup = 0),
-            row=1,
-            col=1)
-        my_base = [my_base[t-1] + COGEN_CR[t-1] for t in b.TIME_s] 
-    
-    # Add a trace for the baseline in the second subplot
-    baseline = [pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t]) for t in b.TIME_s]
-    fig.add_trace(go.Scatter(x=time, y=baseline, mode='lines+markers', name='Baseline [kW]', 
-                        line=dict(color='steelblue')), row=2, col=1)
-    
-    # Add a trace for the real POD exchange in the second subplot
-    real_POD = [pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
-    fig.add_trace(go.Scatter(x=time, y=real_POD, mode='lines+markers', name='Real POD exchange [kW]', 
-                        line=dict(color='firebrick')), row=2, col=1)
+            col=1) 
         
+        POD=[pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t])-pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(
+            x = time,
+            y = POD,
+            name = f'(Baseline - Real_POD) [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in POD]),
+            row=1,
+            col=1)
+
+        my_base = [0 for t in b.TIME_s]        
+
+        for e in b.FLEX_BESS_s:
+            BESS_CR=[pyo.value(b.model().BESS_b[e].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+            fig.add_trace(go.Bar(
+                x = time,
+                y = BESS_CR,
+                base = my_base,
+                name = f'BESS CR [kW]',
+                opacity = .5,
+                hovertext= ['Value: {:.2f}'.format(val) for val in BESS_CR],
+                offsetgroup = 0),
+                row=1,
+                col=1)
+            my_base = [my_base[t-1] + BESS_CR[t-1] for t in b.TIME_s]
+        
+        for g in b.FLEX_COGEN_s:
+            COGEN_CR=[pyo.value(b.model().COGEN_b[g].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+            fig.add_trace(go.Bar(
+                x = time,
+                y = COGEN_CR,
+                base = my_base,
+                name = f'CHP CR [kW]',
+                opacity = .5,
+                hovertext= ['Value: {:.2f}'.format(val) for val in COGEN_CR],
+                offsetgroup = 0),
+                row=1,
+                col=1)
+            my_base = [my_base[t-1] + COGEN_CR[t-1] for t in b.TIME_s] 
+        
+        # Add a trace for the baseline in the second subplot
+        baseline = [pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(x=time, y=baseline, mode='lines+markers', name='Baseline [kW]', 
+                            line=dict(color='steelblue')), row=2, col=1)
+        
+        # Add a trace for the real POD exchange in the second subplot
+        real_POD = [pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(x=time, y=real_POD, mode='lines+markers', name='Real POD exchange [kW]', 
+                            line=dict(color='firebrick')), row=2, col=1)
+        
+    if b.model().logic_schedulingReschedulingSelection_p==1 and b.model().logic_rescheduling_localGlobalSelection_p==0:
+        #DIAGRAM 1
+        FLEX_UP_SCH_96 = [pyo.value(b.model().FLEX_b["FLEX_1"].power_scheduled_capacityRetentionUp_p[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(
+            x = time,
+            y = FLEX_UP_SCH_96,
+            name = f'Reserved power [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_SCH_96]),
+            row=1,
+            col=1)
+            
+        my_base = [0 for t in b.TIME_s]      
+            
+        for e in b.FLEX_BESS_s:
+            BESS_CR=[pyo.value(b.model().BESS_b[e].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+
+            fig.add_trace(go.Bar(
+                x = time,
+                y = BESS_CR,
+                base = my_base,
+                name = f'BESS CR [kW]',
+                opacity = .5,
+                hovertext= ['Value: {:.2f}'.format(val) for val in BESS_CR],
+                offsetgroup = 0),
+                row=1,
+                col=1)
+            my_base = [my_base[t-1] + BESS_CR[t-1] for t in b.TIME_s]
+
+        for g in b.FLEX_COGEN_s:
+            COGEN_CR=[pyo.value(b.model().COGEN_b[g].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+            fig.add_trace(go.Bar(
+                x = time,
+                y = COGEN_CR,
+                base = my_base,
+                name = f'CHP CR [kW]',
+                opacity = .5,
+                hovertext= ['Value: {:.2f}'.format(val) for val in COGEN_CR],
+                offsetgroup = 0),
+                row=1,
+                col=1)
+        
+        #DIAGRAM 2
+        FLEX_UP_BASELINE_96 = [pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(
+            x = time,
+            y = FLEX_UP_BASELINE_96,
+            name = f'Baseline [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_BASELINE_96]),
+            row=2,
+            col=1)
+        
+        my_base = [0 for t in b.TIME_s]  
+        
+        POD = [pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Bar(
+            x = time,
+            y = POD,
+            base = my_base,
+            name = f'POD [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in POD],
+            offsetgroup = 0),
+            row=2,
+            col=1)
+        
+        my_base = [my_base[t-1] + POD[t-1] for t in b.TIME_s]
+        
+        FLEX_UP_ACT_96 = [pyo.value(b.model().FLEX_b["FLEX_1"].power_FlexActivatedUp_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Bar(
+            x = time,
+            y = FLEX_UP_ACT_96,
+            base = my_base,
+            name = f'Provided Upward Flexibility [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_ACT_96],
+            offsetgroup = 0),
+            row=2,
+            col=1)
+        
+        #3° DIAGRAM
+        FLEX_UP_DIS_96 = [pyo.value(b.model().FLEX_b["FLEX_1"].local_dispatchingUp_p[t]) for t in b.TIME_s]
+        fig.add_trace(go.Scatter(
+            x = time,
+            y = FLEX_UP_DIS_96,
+            name = f'Dispatched Upward Flexibility [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_DIS_96]),
+            row=3,
+            col=1) 
+        
+        my_base = [0 for t in b.TIME_s]
+
+        fig.add_trace(go.Bar(
+            x = time,
+            y = FLEX_UP_ACT_96,
+            base = my_base,
+            name = f'Provided Upward Flexibility [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_ACT_96],
+            offsetgroup = 0),
+            row=3,
+            col=1)
+        my_base = [my_base[t-1] + FLEX_UP_ACT_96[t-1] for t in b.TIME_s]
+
+        FLEX_UP_SLACK_96 = [_v(b.model().FLEX_b["FLEX_1"].power_localFlex_slackUp_v[t]) for t in b.TIME_s]  
+        fig.add_trace(go.Bar(
+            x = time,
+            y = FLEX_UP_SLACK_96,
+            base = my_base,
+            name = f'Un-provided Upward Flexibility (Slack) [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP_SLACK_96],
+            offsetgroup = 0),
+            row=3,
+            col=1)
+                
     # Update layout
     fig.update_layout(
         title=f"Flex Up Balance - {name}",
@@ -501,6 +625,7 @@ def create_reportFLEX(b,name,folder):
         xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
         yaxis=dict(title="kW"), #range=[0, 4000]),  # Primary y-axis for power fluxes
         yaxis2=dict(title="kW"),
+        yaxis3=dict(title="kW"),
         legend=dict(title="Legend"),
         template="plotly_white",
         height=800  # Adjust the height for better visualization

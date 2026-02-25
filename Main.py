@@ -34,10 +34,11 @@ import src.Model as ModelEMS
 
 solver_name = 'gurobi' # requires Gurobi installation
 time_limit = 1800 #s
+mipgap = 0.01 # 1% MIP gap
 
 # Insert the folder of the proposed test from the TEST_folder in "TEST_SELECTION"   
 TEST_FOLDER = 'examples'
-TEST_SELECTION  = '0_scheduling_FLEX'
+TEST_SELECTION  = '0_rescheduling_FLEX'
 TEST_NAME="input.txt"
 FILE_PATH = './'+TEST_FOLDER+'/'+TEST_SELECTION
 
@@ -66,6 +67,8 @@ else:
 instance = ModelEMS.mod.create_instance(data_final)
 
 opt = pyomo.opt.SolverFactory(solver_name)
+#opt.options['mipgap'] = mipgap # set relative MIP gap to 1%
+opt.options['timelimit'] = time_limit # set time limit to 60 seconds
       
 if solver_name=='gurobi':
     results = opt.solve(instance,symbolic_solver_labels=True,tee=True)

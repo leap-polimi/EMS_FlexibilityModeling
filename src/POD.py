@@ -68,7 +68,7 @@ def create_block(b,g):
     b.power_sold_init_p = Param(within=NonNegativeReals) #:param sold_init_p: power sold at the start of optimization [kW]
     b.power_purchased_init_p = Param(within=NonNegativeReals) #:param purchased_init_p: power purchased at the start of optimization [kW] 
     
-    b.logic_isPenaltyWithdrawnActive_p = Param(within=Binary, default=1) #:param logic_isPenaltyWithdrawnActive_p: binary [1] minimal withdrawn logics is active
+    b.logic_isPenaltyWithdrawnActive_p = Param(within=Binary, default=0) #:param logic_isPenaltyWithdrawnActive_p: binary [1] minimal withdrawn logics is active
     b.logic_isSlackAllowed_p = Param(within=Binary, default=0) #:param logic_isSlackAllowed_p: 1 = Slacks are allowed while following external setpoint for exchanges
     
     #.. section:: GRID-EXCHANGE PARAMETERS

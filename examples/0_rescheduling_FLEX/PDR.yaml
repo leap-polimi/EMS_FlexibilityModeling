@@ -1,9 +1,9 @@
 PDR_b:
   PDR_1:
-    cost_naturalGas_p: {null: 0.325711}
+    cost_naturalGas_p: {null: 0.593144}
     LHV_p: {null: 9.6}
-    cost_networksObligations_p: {null: 0.021349965}
-    cost_exciseNG_p: {null: 0.012498}
-    cost_exciseEE_p: {null: 0.0004493}
+    cost_networksObligations_fixed_p: {null: 2.643893333333333}
+    cost_networksObligations_smc_p: {null: 0.093001}
+    cost_exciseNG_p: {null: 0.186}
+    cost_exciseEE_p: {null: 0.00015}
     VAT_p: {null: 0.22}
-    efficiency_cogenStandard_p: {null: 0.220}
