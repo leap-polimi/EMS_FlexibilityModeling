@@ -33,6 +33,46 @@ Flexibility services are modeled through two key elements:
 
 ---
 
+## How to use the model to optimize participation in explicit flexibility schemes
+
+The model can be used in two main modes, depending on whether you are planning reserve bids ahead of time or operating under real-time dispatch instructions.
+
+### 1) Optimize power-reserve bids in month-ahead or day-ahead auctions (Scheduling)
+Use this mode to determine how much upward reserve capacity should be retained from flexible assets (e.g., BESS, CHP) so that the site can comply with possible DSO activation requests during the availability window.
+
+Set:
+- logic_schedulingReschedulingSelection_p = 0 (scheduling)
+- FLEX_b.logic_is_capacityRetention_Optimized_p == 1 (capacity retention is variable--> it has to be optimized)
+
+Provide as inputs:
+- Reserve remuneration (€/MW/h)
+- Activation remuneration (€/MWh)
+- Service specifications (availability time window, max duration of activation, etc.)
+- Forecasts for uncertain variables (loads, renewable generation, prices, etc.)
+
+Output:
+- The economically optimal power band to reserve and offer in the market, ensuring feasibility against potential dispatch orders within the DSO-defined time window.
+
+Note: Since this is a forward-planning stage, results strongly depend on the quality of forecasts.
+
+### 2) Optimize system operation under real-time measurements and dispatching orders (Rescheduling)
+Use this mode when the DSO provides dispatching/activation orders close to real time (e.g., with at least 1 hour notice). The model can then be run in a rolling-horizon mode:
+- Optimize control actions for the next hour using measured inputs and potential dispatching orders
+- Re-optimize the remaining horizon (e.g., the next 23 hours) using updated forecasts
+
+Set:
+- logic_schedulingReschedulingSelection_p = 1 (rescheduling)
+- logic_rescheduling_localGlobalSelection_p = 0 (local flexibility provision)
+
+Key feature:
+- If strict compliance with dispatch orders would make the problem infeasible (e.g., because reserves were over-committed due to forecast errors), the model can allow limited non-compliance by introducing a penalty term
+
+### How flexibility provision is measured: Baseline
+
+In both modes, flexibility provision is measured at the Point of Delivery (POD) with respect to a predefined baseline. The power reserve and service activation are therefore evaluated as deviations of the POD net exchange with respect of the pre-defined baseline.
+
+---
+
 ## EMS (Original project description)
 
 Energy Management System (EMS) developed by LEAP scarl (www.leap.polimi.it) and Politecnico di Milano (www.polimi.it)
