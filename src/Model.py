@@ -730,7 +730,7 @@ def OPEX_calc(mod):
         sum(mod.BESS_b[e].cost_operationMaintenance_v for e in mod.BESS_s) +\
         sum(mod.BESS_b[e].cost_minRevenuesCycle_v for e in mod.BESS_s) +\
         sum(mod.GENSET_b[g].cost_startUp_total_v for g in mod.GENSET_s) + \
-        sum(mod.GENSET_b[g].cost_shutDown_total_v for g in mod.GENSET_s) +\
+        sum(mod.GENSET_b[g].cost_shutDown_total_v for g in mod.GENSET_s) -\
         sum(mod.FLEX_b[q].revenue_flexUp_v + mod.FLEX_b[q].revenue_flexDown_v for q in mod.FLEX_s)
         
 

@@ -44,11 +44,19 @@ def save_results(b, name, folder):
     static['penalty_withdrawn_v'] = [b.penalty_withdrawn_v.value]
     static['penalty_slack_v'] = [b.penalty_slack_v.value]
     static['penalty_imbalance_v'] = [b.penalty_imbalance_v.value]
+    static['cost_electricity_v'] = [sum(b.model().POD_b[p].cost_electricity_v.value for p in b.POD_s)]
+    static['revenue_electricity_v'] = [sum(b.model().POD_b[p].revenue_electricity_v.value for p in b.POD_s)]
+    static['cost_gas_v'] = [sum(b.model().PDR_b[p].cost_total_v.value for p in b.PDR_s)]
+    static['costO&M_Genset_v'] = [sum(b.model().GENSET_b[g].cost_operationMaintenance_v.value for g in b.GENSET_s)]
+    static['costO&M_BESS_v'] = [sum(b.model().BESS_b[e].cost_operationMaintenance_v.value for e in b.BESS_s)]
+    static['costO&M_COGEN_v'] = [sum(b.model().COGEN_b[g].cost_operationMaintenance_v.value for g in b.COGEN_s)]
+    static['costO&M_BOILER_v'] = [sum(b.model().BOILER_b[g].cost_operationMaintenance_v.value for g in b.BOILER_s)]
+    static['revenue_FLEX_v'] = [sum(b.model().FLEX_b[q].revenue_flexUp_v.value + b.model().FLEX_b[q].revenue_flexDown_v.value for q in b.FLEX_s)]
     
     return (time_indexed, static)
 
 TEST_FOLDER = 'examples'
-TEST_SELECTION  = '0_scheduling'
+TEST_SELECTION  = '0_scheduling_FLEX'
 draw_graphs=True
 print_report=True
 
@@ -94,6 +102,15 @@ for u in instance.NG_CIRCUIT_s:
         ng_circuit_time, ng_circuit_static = circuit_lib.ng_save_results(instance.NG_CIRCUIT_b[u],u,FILE_PATH)
         ng_circuit_time.to_excel(writer,sheet_name=f'{u}_timeindexed',startrow=0 , startcol=0)   
         ng_circuit_static.to_excel(writer,sheet_name=f'{u}_static',startrow=0 , startcol=0) 
+
+for u in instance.FLEX_s:
+    if draw_graphs:
+        circuit_lib.create_reportFLEX(instance.FLEX_b[u],u,FILE_PATH) 
+    
+    if print_report:
+        flex_circuit_time, flex_circuit_static = circuit_lib.flex_save_results(instance.FLEX_b[u],u,FILE_PATH)
+        flex_circuit_time.to_excel(writer,sheet_name=f'{u}_timeindexed',startrow=0 , startcol=0)   
+        flex_circuit_static.to_excel(writer,sheet_name=f'{u}_static',startrow=0 , startcol=0) 
   
 if print_report:
     writer.close()

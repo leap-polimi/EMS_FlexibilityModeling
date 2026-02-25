@@ -1,0 +1,73 @@
+COGEN_b:
+  COGEN_1:
+    power_electricityNominal_p: {null: 2000}
+    power_electricityMin_p: {null: 0.5}
+    power_electricityMax_p: {null: 1}
+    efficiency_electricitySlope_simple_p: {null: 0.467365}
+    efficiency_electricityIntercept_simple_p: {null: -121.12}
+    efficiency_heatSlope_simple_p: {null: 0.36764}
+    efficiency_heatIntercept_simple_p: {null: 81.64999}
+    efficiency_electricityIntercept_p:
+      1: -44.76023999999984
+      2: -97.01647199999911
+      3: -201.07953599999973
+      4: 30.09182399999895
+      5: -424.68300000000136
+    efficiency_electricitySlope_p:
+      1: 0.43778
+      2: 0.4571599999999997
+      3: 0.4902399999999999
+      4: 0.42594000000000026
+      5: 0.5383800000000003
+    efficiency_heatIntercept_p:
+      1: 165.0196800000001
+      2: 127.59364800000048
+      3: 86.82407999999964
+      4: -224.55619199999978
+      5: 341.7686999999996
+    efficiency_heatSlope_p:
+      1: 0.33543
+      2: 0.3493099999999998
+      3: 0.36227000000000004
+      4: 0.44887999999999995
+      5: 0.30886
+    fuelInputLowerBound_p:
+      1: 2247
+      2: 2696.4
+      3: 3145.7999999999997
+      4: 3595.2000000000003
+      5: 4044.6
+    fuelInputUpperBound_p:
+      1: 2696.4
+      2: 3145.7999999999997
+      3: 3595.2000000000003
+      4: 4044.6
+      5: 4494
+    power_electricityRampDown_p: {null: 1}
+    power_electricityRampUp_p: {null: 1}
+    power_electricityStartUp_p: {null: 1}
+    power_electricityShutDown_p: {null: 1}
+    power_heatStartUp_p: {null: 1}
+    power_heatShutDown_p: {null: 1}
+    timesteps_minimumTimeOn_p: {null: 1}
+    timesteps_minimumTimeOff_p: {null: 1}
+    cost_operationMaintenanceTimestep_p: {null: 4}
+    logic_isOn_before_p:
+      0: 0
+      -1: 0
+    logic_isStartingUp_before_p:
+      0: 0
+      -1: 0
+    logic_isShuttingDown_before_p:
+      0: 0
+      -1: 0
+    power_heatOutput_before_p:
+      0: 0
+      -1: 0
+    power_electricityOutput_before_p:
+      0: 0
+      -1: 0
+    timesteps_startUpDuration_p: {null: 0}
+    timesteps_shutDownDuration_p: {null: 0}
+    cost_startUp_p: {null: 0}
+    cost_shutDown_p: {null: 0}

@@ -1,0 +1,31 @@
+GENSET_b:
+  GENSET_1:
+    power_nominal_p: {null: 3515}
+    power_min_p: {null: 0.245}
+    power_max_p: {null: 1}
+    efficiency_slope_p: {null: 0.5268}
+    efficiency_intercept_p: {null: -341.112}
+    power_rampUp_p: {null: 1}
+    power_rampDown_p: {null: 1}
+    power_startUp_p: {null: 1}
+    power_shutDown_p: {null: 1}
+    timesteps_minimumTimeOn_p: {null: 1}
+    timesteps_minimumTimeOff_p: {null: 1}
+    cost_operationMaintenanceTimestep_p: {null: 2}
+    logic_isOn_before_p:
+      0: 1
+      -1: 1
+    logic_isStartingUp_before_p:
+      0: 0
+      -1: 0
+    logic_isShuttingDown_before_p:
+      0: 0
+      -1: 0
+    power_electricityOutput_before_p:
+      0: 0
+      -1: 0
+    timesteps_startUpDuration_p: {null: 0}
+    timesteps_shutDownDuration_p: {null: 0}
+    cost_startUp_p: {null: 0}
+    cost_shutDown_p: {null: 0}
+    

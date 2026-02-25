@@ -60,7 +60,7 @@ def create_block(b,g):
     b.fuelInputLowerBound_p = Param(b.eff_pieces_s, within=NonNegativeReals) #:param fuelInputLowerBound_p: [kW] Lower value of the fuelInput-interval selected for the efficiency curves approx
     b.fuelInputUpperBound_p = Param(b.eff_pieces_s, within=NonNegativeReals) #:param fuelInputUpperBound_p: [kW] Upper value of the fuelInput-interval selected for the efficiency curves approx
 
-    b.logic_isPiecewiseEfficiency_p = Param(within= Binary, default=0) #:param logic_isPiecewiseEfficiency_p: [-] Binary parameter indicating if we are using the piecewise efficiency curve
+    b.logic_isPiecewiseEfficiency_p = Param(within= Binary, default=0) #:param logic_isPiecewiseEfficiency_p: [-] Binary parameter indicating if we are using the piecewise efficiency curve: [1] = piecewise, [0] = single linearization
 
     # Single linearization of the efficiency curves (1 piece)
     b.efficiency_electricitySlope_simple_p = Param(within=Reals) #:param efficiency_electricitySlope_p: Slope term for part-load output calculation
@@ -79,18 +79,18 @@ def create_block(b,g):
     
     @b.Param (within=NonNegativeReals)
     def power_heatNominal_p (b): #:param power_heatNominal_p: Nominal thermal power of the COGEN (output) [kW]
-        fuel_input = (b.power_electricityNominal_p - b.efficiency_electricityIntercept_p)/b.efficiency_electricitySlope_p
-        return b.efficiency_heatSlope_p*fuel_input+b.efficiency_heatIntercept_p
+        fuel_input = (b.power_electricityNominal_p - b.efficiency_electricityIntercept_simple_p)/b.efficiency_electricitySlope_simple_p
+        return b.efficiency_heatSlope_simple_p*fuel_input+b.efficiency_heatIntercept_simple_p
     
     @b.Param (within=NonNegativeReals)
     def power_heatMax_p (b): #:param power_heatMax_p: Maximum Load (thermal) for the COGEN [pu]
-        fuel_input = (b.power_electricityNominal_p *  b.power_electricityMax_p - b.efficiency_electricityIntercept_p)/b.efficiency_electricitySlope_p
-        return (b.efficiency_heatSlope_p*fuel_input+b.efficiency_heatIntercept_p)/b.power_heatNominal_p
+        fuel_input = (b.power_electricityNominal_p *  b.power_electricityMax_p - b.efficiency_electricityIntercept_simple_p)/b.efficiency_electricitySlope_simple_p
+        return (b.efficiency_heatSlope_simple_p*fuel_input+b.efficiency_heatIntercept_simple_p)/b.power_heatNominal_p
     
     @b.Param (within=NonNegativeReals)
     def power_heatMin_p (b): #:param power_heatMin_p: Minimum Load (thermal) for the COGEN [pu]
-        fuel_input = (b.power_electricityNominal_p *b.power_electricityMin_p - b.efficiency_electricityIntercept_p)/b.efficiency_electricitySlope_p
-        return (b.efficiency_heatSlope_p*fuel_input+b.efficiency_heatIntercept_p)/b.power_heatNominal_p
+        fuel_input = (b.power_electricityNominal_p *b.power_electricityMin_p - b.efficiency_electricityIntercept_simple_p)/b.efficiency_electricitySlope_simple_p
+        return (b.efficiency_heatSlope_simple_p*fuel_input+b.efficiency_heatIntercept_simple_p)/b.power_heatNominal_p
         
     b.cost_startUp_p=Param(within=NonNegativeReals) #:param cost_startUp_p: [€] cost of start-up event
     b.cost_shutDown_p=Param(within=NonNegativeReals) #:param cost_shutDown_p: [€] cost of shut-down event

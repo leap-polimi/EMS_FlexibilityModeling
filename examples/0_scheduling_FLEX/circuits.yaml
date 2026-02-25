@@ -1,0 +1,20 @@
+EL_CIRCUIT_b:
+  EN1:
+    CONNECTED_BESS_s: {null: [BESS_1]}
+    CONNECTED_POD_s: {null: [POD_1]}
+    CONNECTED_COGEN_s: {null: [COGEN_1]}
+    CONNECTED_EL_LOAD_s: {null: [EL_LOAD_1]}
+    logic_isBess_CycleRevenuesThresholdActive_p: {null: 0}
+
+TH_CIRCUIT_b:
+  TH1:
+    CONNECTED_PDR_s: {null: [PDR_1]}
+    CONNECTED_BOILER_s: {null: [BOILER_1, BOILER_2]}
+    CONNECTED_COGEN_s: {null: [COGEN_1]}
+    CONNECTED_TH_LOAD_s: {null: [TH_LOAD_1]}
+    
+NG_CIRCUIT_b:
+  NG1:
+    CONNECTED_PDR_s: {null: [PDR_1]}
+    CONNECTED_BOILER_s: {null: [BOILER_1, BOILER_2]}
+    CONNECTED_COGEN_s: {null: [COGEN_1]}

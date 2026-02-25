@@ -7,6 +7,10 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
+Further development / modifications (fork):
+Copyright (C) 2024-2026 Andrea Scrocca and Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
+
 This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
@@ -37,11 +41,13 @@ def create_reportEL(b,name,folder):
     xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
     
     fig = make_subplots(
-        rows=1, cols=1,
-        subplot_titles=("Electricity Balance"),
-        shared_yaxes=True
-        )
-    
+        rows=2, cols=1,  # Two rows, one column
+        row_heights=[0.75, 0.25],
+        shared_xaxes=True,  # Share the x-axis
+        vertical_spacing=0.1,  # Space between subplots
+        subplot_titles=("Electricity Balance", "BESS SOC")
+    )
+
     time = [t for t in b.TIME_s]
 #Output of electricity Balance - LOAD + POD (injected)  + BESS ( for charging )     
     for l in b.CONNECTED_EL_LOAD_s:
@@ -51,7 +57,9 @@ def create_reportEL(b,name,folder):
             y = EL_OUT,
             name = f'Electric Load - {l} [kW]',
             opacity = .5,
-            hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT])) 
+            hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT]),
+            row=1,
+            col=1) 
     
     my_base = [0 for t in b.TIME_s]        
 
@@ -65,7 +73,9 @@ def create_reportEL(b,name,folder):
             name = f'POD Injected - {p} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT],
-            offsetgroup = 0))
+            offsetgroup = 0),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] - EL_OUT[t-1] for t in b.TIME_s]
 
     
@@ -79,7 +89,22 @@ def create_reportEL(b,name,folder):
             name = f'BESS Charging - {e} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT],
-            offsetgroup = 0))
+            offsetgroup = 0),
+            row=1,
+            col=1)
+        my_base = [my_base[t-1] - EL_OUT[t-1] for t in b.TIME_s]
+
+        EL_OUT=[pyo.value(b.model().BESS_b[e].power_aux_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Bar(
+            x = time,
+            y = [-val for val in EL_OUT],
+            base = my_base,
+            name = f'BESS Auxiliaries - {e} [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT],
+            offsetgroup = 0),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] - EL_OUT[t-1] for t in b.TIME_s]
       
     for v in b.CONNECTED_EV_s:
@@ -91,7 +116,9 @@ def create_reportEL(b,name,folder):
             name = f'EV Charging - {v} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT],
-            offsetgroup = 0))
+            offsetgroup = 0),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] - EL_OUT[t-1] for t in b.TIME_s]
  
 #Input of electricity Balance - Each GENSET + COGEN + BESS ( DISCHARGED )+  PV + POD (WITHDRAWN)
@@ -105,7 +132,9 @@ def create_reportEL(b,name,folder):
             name = f'POD Withdrawn - {p} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1))
+            offsetgroup = 1),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]
         
     for p in b.CONNECTED_PV_s:
@@ -117,7 +146,9 @@ def create_reportEL(b,name,folder):
             name = f'PV production - {p} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1))
+            offsetgroup = 1),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]  
         
     for g in b.CONNECTED_COGEN_s:
@@ -129,7 +160,9 @@ def create_reportEL(b,name,folder):
             name = f'Cogen production - {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1))
+            offsetgroup = 1),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s] 
         
     for g in b.CONNECTED_GENSET_s:
@@ -141,7 +174,9 @@ def create_reportEL(b,name,folder):
             name = f'Genset production - {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1))
+            offsetgroup = 1),
+            row=1,
+            col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]        
  
 
@@ -155,7 +190,9 @@ def create_reportEL(b,name,folder):
            name = f'BESS discharging - {e} [kW]',
            opacity = .5,
            hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-           offsetgroup = 1))
+           offsetgroup = 1),
+           row=1,
+           col=1)
        my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]
        
 
@@ -169,7 +206,9 @@ def create_reportEL(b,name,folder):
                 name = f'BDE Down - {p} [kW]',
                 opacity = .5,
                 hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN]
-                ))
+                ),
+                row=1,
+                col=1)
         
         for p in b.CONNECTED_POD_s:
             EL_OUT=[pyo.value(b.model().POD_b[p].baselineWithdrawn_p[t]-b.model().POD_b[p].baselineInjected_p[t]) for t in b.TIME_s]
@@ -180,7 +219,9 @@ def create_reportEL(b,name,folder):
                 name = f'Baseline- {p} [kW]',
                 opacity = .5,
                 hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT]
-                ))       
+                ),
+                row=1,
+                col=1)       
         for p in b.CONNECTED_POD_s:
             EL_OUT=[pyo.value(b.model().POD_b[p].BDE_Up_v[t]) for t in b.TIME_s]
             fig.add_trace(go.Scatter(
@@ -190,7 +231,21 @@ def create_reportEL(b,name,folder):
                 name = f'BDE Up- {p} [kW]',
                 opacity = .5,
                 hovertext= ['Value: {:.2f}'.format(val) for val in EL_OUT]
-                ))
+                ),
+                row=1,
+                col=1)
+            
+    #Add traces for BESS SOC in the second subplot
+    for e in b.model().BESS_s:
+        BESS_SOC=[pyo.value(b.model().BESS_b[e].energy_soc_v[t]*100) for t in b.model().TIME_s]
+        fig.add_trace(go.Scatter(
+            x = time,
+            y = BESS_SOC,
+            name = f'BESS SOC - {e} [%]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in BESS_SOC]),
+            row=2,
+            col=1)
         
     fig.update_layout(height=500, title_text=f'Electricity Balance - {name}',title_x=0.5, showlegend=True,
                       template="plotly_white",
@@ -216,7 +271,6 @@ def create_reportTH(b,name,folder):
     
     fig = make_subplots(
         rows=1, cols=1,
-        subplot_titles=("Thermal Balance"),
         shared_yaxes=True
         )
     
@@ -234,7 +288,7 @@ def create_reportTH(b,name,folder):
     
 
 
-#Input of Thermal Balance - Each GENSET + COGEN + BESS ( DISCHARGED )+  PV + POD (WITHDRAWN)
+#Input of Thermal Balance - Each BOILER + COGEN 
     my_base = [0 for t in b.TIME_s]  
     for g in b.CONNECTED_COGEN_s:
         TH_IN=[pyo.value(b.model().COGEN_b[g].power_heatOutput_v[t]) for t in b.TIME_s]
@@ -290,7 +344,6 @@ def create_reportNG(b,name,folder):
     
     fig = make_subplots(
         rows=1, cols=1,
-        subplot_titles=("Electricity Balance"),
         shared_yaxes=True
         )
     time = [t for t in b.TIME_s]
@@ -304,7 +357,7 @@ def create_reportNG(b,name,folder):
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_OUT],)) 
 
-#Input of Natural GAS Balance - Each GENSET + COGEN 
+#Input of Natural GAS Balance - Each GENSET + COGEN + BOILER
 
     my_base = [0 for t in b.TIME_s]   
      
@@ -340,7 +393,7 @@ def create_reportNG(b,name,folder):
             x = time,
             y = NG_IN,
             base = my_base,
-            name = f'BOILER Production - {u} [kW fuel]',
+            name = f'BOILER Power fuel input - {u} [kW fuel]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_IN],
             offsetgroup = 1))
@@ -361,6 +414,106 @@ def create_reportNG(b,name,folder):
        
     uri = pathlib.Path(address).absolute().as_uri()
     webbrowser.open(uri)
+
+def create_reportFLEX(b,name,folder):   
+    b.TIME_s = Set(initialize=b.model().TIME_s)  
+    b.mode_p = Param(initialize=b.model().logic_schedulingReschedulingSelection_p)
+    xrange = [b.TIME_s.first(),b.TIME_s.last()]
+    xticks = list(range(1,b.model().timesteps_p.value,int(1/b.model().timestep_size_p.value)))
+    xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
+
+    time = [t for t in b.TIME_s]
+    
+    # Create subplots with a shared x-axis
+    fig = make_subplots(
+        rows=2, cols=1,  # Two rows, one column
+        shared_xaxes=True,  # Share the x-axis
+        vertical_spacing=0.1,  # Space between subplots
+        subplot_titles=("Flex UP breakdown", "Baseline and real Exchange")
+    )
+    
+    FLEX_UP = [pyo.value(b.model().FLEX_b["FLEX_1"].power_flexUp_v[t]) for t in b.TIME_s]
+    fig.add_trace(go.Scatter(
+        x = time,
+        y = FLEX_UP,
+        name = f'Provided Upward Flexibility [kW]',
+        opacity = .5,
+        hovertext= ['Value: {:.2f}'.format(val) for val in FLEX_UP]),
+        row=1,
+        col=1) 
+    
+    POD=[pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t])-pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
+    fig.add_trace(go.Scatter(
+        x = time,
+        y = POD,
+        name = f'(Baseline - Real_POD) [kW]',
+        opacity = .5,
+        hovertext= ['Value: {:.2f}'.format(val) for val in POD]),
+        row=1,
+        col=1)
+
+    my_base = [0 for t in b.TIME_s]        
+
+    for e in b.FLEX_BESS_s:
+        BESS_CR=[pyo.value(b.model().BESS_b[e].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Bar(
+            x = time,
+            y = BESS_CR,
+            base = my_base,
+            name = f'BESS CR [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in BESS_CR],
+            offsetgroup = 0),
+            row=1,
+            col=1)
+        my_base = [my_base[t-1] + BESS_CR[t-1] for t in b.TIME_s]
+    
+    for g in b.FLEX_COGEN_s:
+        COGEN_CR=[pyo.value(b.model().COGEN_b[g].power_capacityRetentionUp_v[t]) for t in b.TIME_s]
+        fig.add_trace(go.Bar(
+            x = time,
+            y = COGEN_CR,
+            base = my_base,
+            name = f'CHP CR [kW]',
+            opacity = .5,
+            hovertext= ['Value: {:.2f}'.format(val) for val in COGEN_CR],
+            offsetgroup = 0),
+            row=1,
+            col=1)
+        my_base = [my_base[t-1] + COGEN_CR[t-1] for t in b.TIME_s] 
+    
+    # Add a trace for the baseline in the second subplot
+    baseline = [pyo.value(b.model().FLEX_b["FLEX_1"].baseline_p[t]) for t in b.TIME_s]
+    fig.add_trace(go.Scatter(x=time, y=baseline, mode='lines+markers', name='Baseline [kW]', 
+                        line=dict(color='steelblue')), row=2, col=1)
+    
+    # Add a trace for the real POD exchange in the second subplot
+    real_POD = [pyo.value(b.model().POD_b["POD_1"].power_electricityWithdrawn_v[t]-b.model().POD_b["POD_1"].power_electricityInjected_v[t]) for t in b.TIME_s]
+    fig.add_trace(go.Scatter(x=time, y=real_POD, mode='lines+markers', name='Real POD exchange [kW]', 
+                        line=dict(color='firebrick')), row=2, col=1)
+        
+    # Update layout
+    fig.update_layout(
+        title=f"Flex Up Balance - {name}",
+        title_x=0.5,
+        barmode = "stack",
+        xaxis_title="Time Step",
+        xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
+        yaxis=dict(title="kW"), #range=[0, 4000]),  # Primary y-axis for power fluxes
+        yaxis2=dict(title="kW"),
+        legend=dict(title="Legend"),
+        template="plotly_white",
+        height=800  # Adjust the height for better visualization
+    )
+
+    address = f'{folder}/Reports/{name}.html'
+    uri = pathlib.Path(address).absolute().as_uri()
+    
+    with open(address, 'w') as f:
+        f.write(fig.to_html(full_html=True, include_plotlyjs='cdn'))
+       
+    uri = pathlib.Path(address).absolute().as_uri()
+    webbrowser.open(uri)    
 
 
 def el_save_results(b, name, folder):  
@@ -404,6 +557,21 @@ def th_save_results(b, name, folder):
     time_indexed.set_index("Index", inplace=True)
     
     time_indexed['power_heatTotalProduction_v'] = [b.power_heatTotalProduction_v[t].value for t in b.TIME_s]
+    
+    # Create series with static variables
+    static = pd.DataFrame()
+    
+    return (time_indexed, static)
+
+def flex_save_results(b, name, folder):
+    
+    #Create dataframe with time-indexed variables
+    
+    time_indexed = pd.DataFrame()
+    time_indexed['Index'] = [t for t in b.TIME_s]
+    time_indexed.set_index("Index", inplace=True)
+    
+    time_indexed['baseline_p'] = [b.baseline_p[t] for t in b.TIME_s]
     
     # Create series with static variables
     static = pd.DataFrame()

@@ -1,0 +1,74 @@
+COGEN_b:
+  COGEN_1:
+    power_electricityNominal_p: {null: 1998.18}
+    power_electricityMin_p: {null: 0.377}
+    power_electricityMax_p: {null: 1}
+    efficiency_electricitySlope_p: {null: 0.588}
+    efficiency_electricityIntercept_p : {null: -422.33}
+    efficiency_heatSlope_p: {null: 0.39}
+    efficiency_heatIntercept_p: {null: 68.89}
+    power_electricityRampDown_p: {null: 1}
+    power_electricityRampUp_p: {null: 1}
+    power_electricityStartUp_p: {null: 1}
+    power_electricityShutDown_p: {null: 1}
+    power_heatStartUp_p: {null: 1}
+    power_heatShutDown_p: {null: 1}
+    timesteps_minimumTimeOn_p: {null: 1}
+    timesteps_minimumTimeOff_p: {null: 1}
+    cost_operationMaintenanceTimestep_p: {null: 4}
+    logic_isOn_before_p:
+      0: 0
+      -1: 0
+    logic_isStartingUp_before_p:
+      0: 0
+      -1: 0
+    logic_isShuttingDown_before_p:
+      0: 0
+      -1: 0
+    power_heatOutput_before_p:
+      0: 0
+      -1: 0
+    power_electricityOutput_before_p:
+      0: 0
+      -1: 0
+    timesteps_startUpDuration_p: {null: 0}
+    timesteps_shutDownDuration_p: {null: 0}
+    cost_startUp_p: {null: 0}
+    cost_shutDown_p: {null: 0}
+    
+  COGEN_2:
+    power_electricityNominal_p: {null: 1998.18}
+    power_electricityMin_p: {null: 0.377}
+    power_electricityMax_p: {null: 1}
+    efficiency_electricitySlope_p: {null: 0.588}
+    efficiency_electricityIntercept_p : {null: -422.33}
+    efficiency_heatSlope_p: {null: 0.39}
+    efficiency_heatIntercept_p: {null: 68.89}
+    power_electricityRampDown_p: {null: 1}
+    power_electricityRampUp_p: {null: 1}
+    power_electricityStartUp_p: {null: 1}
+    power_electricityShutDown_p: {null: 1}
+    power_heatStartUp_p: {null: 1}
+    power_heatShutDown_p: {null: 1}
+    timesteps_minimumTimeOn_p: {null: 1}
+    timesteps_minimumTimeOff_p: {null: 1}
+    cost_operationMaintenanceTimestep_p: {null: 4}
+    logic_isOn_before_p:
+      0: 0
+      -1: 0
+    logic_isStartingUp_before_p:
+      0: 0
+      -1: 0
+    logic_isShuttingDown_before_p:
+      0: 0
+      -1: 0
+    power_heatOutput_before_p:
+      0: 0
+      -1: 0
+    power_electricityOutput_before_p:
+      0: 0
+      -1: 0  
+    timesteps_startUpDuration_p: {null: 0}
+    timesteps_shutDownDuration_p: {null: 0}
+    cost_startUp_p: {null: 0}
+    cost_shutDown_p: {null: 0}
