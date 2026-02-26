@@ -37,10 +37,7 @@ import pathlib, webbrowser
 def create_reportEL(b,name,folder):   
     b.TIME_s = Set(initialize=b.model().TIME_s)  
     b.mode_p = Param(initialize=b.model().logic_schedulingReschedulingSelection_p)
-    xrange = [b.TIME_s.first(),b.TIME_s.last()]
-    xticks = list(range(1,b.model().timesteps_p.value,int(1/b.model().timestep_size_p.value)))
-    xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
-    
+
     fig = make_subplots(
         rows=2, cols=1,  # Two rows, one column
         row_heights=[0.75, 0.25],
@@ -133,7 +130,7 @@ def create_reportEL(b,name,folder):
             name = f'POD Withdrawn - {p} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1),
+            offsetgroup = 0),
             row=1,
             col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]
@@ -147,7 +144,7 @@ def create_reportEL(b,name,folder):
             name = f'PV production - {p} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1),
+            offsetgroup = 0),
             row=1,
             col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]  
@@ -161,7 +158,7 @@ def create_reportEL(b,name,folder):
             name = f'Cogen production - {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1),
+            offsetgroup = 0),
             row=1,
             col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s] 
@@ -175,7 +172,7 @@ def create_reportEL(b,name,folder):
             name = f'Genset production - {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-            offsetgroup = 1),
+            offsetgroup = 0),
             row=1,
             col=1)
         my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]        
@@ -191,7 +188,7 @@ def create_reportEL(b,name,folder):
            name = f'BESS discharging - {e} [kW]',
            opacity = .5,
            hovertext= ['Value: {:.2f}'.format(val) for val in EL_IN],
-           offsetgroup = 1),
+           offsetgroup = 0),
            row=1,
            col=1)
        my_base = [my_base[t-1] + EL_IN[t-1] for t in b.TIME_s]
@@ -251,8 +248,10 @@ def create_reportEL(b,name,folder):
     fig.update_layout(height=500, title_text=f'Electricity Balance - {name}',title_x=0.5, showlegend=True,
                       template="plotly_white",
                       barmode="stack",
-                      xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
-                      hovermode="x unified"
+                      hovermode="x unified",
+                      xaxis2= dict(title="Timesteps"),
+                      yaxis1= dict(title="Power [kW]"),
+                      yaxis2= dict(title="SOC [%]")
                       )      
     address = f'{folder}/Reports/{name}.html'
     uri = pathlib.Path(address).absolute().as_uri()
@@ -266,17 +265,14 @@ def create_reportEL(b,name,folder):
 def create_reportTH(b,name,folder):    
     b.TIME_s = Set(initialize=b.model().TIME_s)  
     
-    xrange = [b.TIME_s.first(),b.TIME_s.last()]
-    xticks = list(range(1,b.model().timesteps_p.value,int(1/b.model().timestep_size_p.value)))
-    xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
-    
     fig = make_subplots(
         rows=1, cols=1,
         shared_yaxes=True
         )
     
     time = [t for t in b.TIME_s]
-#Output of Thermal Balance - LOAD     
+    
+    #Output of Thermal Balance - LOAD     
     
     for l in b.CONNECTED_TH_LOAD_s:
         TH_OUT= [pyo.value(b.model().TH_LOAD_b[l].power_heatDemand_p[t]) for t in b.TIME_s]
@@ -314,16 +310,15 @@ def create_reportTH(b,name,folder):
             hovertext= ['Value: {:.2f}'.format(val) for val in TH_IN],
             offsetgroup = 1))
         my_base = [my_base[t-1] + TH_IN[t-1] for t in b.TIME_s]
-
  
-
         
         
     fig.update_layout(height=500, title_text=f'Thermal Balance - {name}',title_x=0.5, showlegend=True,
                       template="plotly_white",
                       barmode="stack",
-                      xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
-                      hovermode="x unified"
+                      hovermode="x unified",
+                      xaxis = dict(title="Timesteps"),
+                      yaxis = dict(title="Power [kW]")
                       )      
   
     address = f'{folder}/Reports/{name}.html'
@@ -339,10 +334,6 @@ def create_reportTH(b,name,folder):
 def create_reportNG(b,name,folder):    
     b.TIME_s = Set(initialize=b.model().TIME_s)  
     
-    xrange = [b.TIME_s.first(),b.TIME_s.last()]
-    xticks = list(range(1,b.model().timesteps_p.value,int(1/b.model().timestep_size_p.value)))
-    xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
-    
     fig = make_subplots(
         rows=1, cols=1,
         shared_yaxes=True
@@ -354,7 +345,7 @@ def create_reportNG(b,name,folder):
         fig.add_trace(go.Scatter(
             x = time,
             y = NG_OUT,
-            name = f'Natural Gas withdrawn - {u} [kW fuel ]',
+            name = f'Natural Gas withdrawn - {u} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_OUT],)) 
 
@@ -368,7 +359,7 @@ def create_reportNG(b,name,folder):
             x = time,
             y = NG_IN,
             base = my_base,
-            name = f'Cogen Power fuel input - {g} [kW fuel]',
+            name = f'Cogen Power fuel input - {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_IN],
             offsetgroup = 1))
@@ -380,7 +371,7 @@ def create_reportNG(b,name,folder):
             x = time,
             y = NG_IN,
             base = my_base,
-            name = f'Genset Power fuel input- {g} [kW fuel]',
+            name = f'Genset Power fuel input- {g} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_IN],
             offsetgroup = 1))
@@ -394,7 +385,7 @@ def create_reportNG(b,name,folder):
             x = time,
             y = NG_IN,
             base = my_base,
-            name = f'BOILER Power fuel input - {u} [kW fuel]',
+            name = f'BOILER Power fuel input - {u} [kW]',
             opacity = .5,
             hovertext= ['Value: {:.2f}'.format(val) for val in NG_IN],
             offsetgroup = 1))
@@ -403,8 +394,9 @@ def create_reportNG(b,name,folder):
     fig.update_layout(height=500, title_text=f'Natural Gas Balance - {name}',title_x=0.5, showlegend=True,
                       template="plotly_white",
                       barmode="stack",
-                      xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
-                      hovermode="x unified"
+                      hovermode="x unified",
+                      xaxis = dict(title="Timesteps"),
+                      yaxis = dict(title="Power [kW]")
                       )        
  
     address = f'{folder}/Reports/{name}.html'
@@ -419,9 +411,6 @@ def create_reportNG(b,name,folder):
 def create_reportFLEX(b,name,folder):   
     b.TIME_s = Set(initialize=b.model().TIME_s)  
     b.mode_p = Param(initialize=b.model().logic_schedulingReschedulingSelection_p)
-    xrange = [b.TIME_s.first(),b.TIME_s.last()]
-    xticks = list(range(1,b.model().timesteps_p.value,int(1/b.model().timestep_size_p.value)))
-    xtext = list(range(0,(int(b.model().timesteps_p.value*b.model().timestep_size_p.value))))
 
     time = [t for t in b.TIME_s]
 
@@ -622,11 +611,10 @@ def create_reportFLEX(b,name,folder):
         title=f"Flex Up Balance - {name}",
         title_x=0.5,
         barmode = "stack",
-        xaxis_title="Time Step",
-        xaxis1 = dict(range=xrange, tickvals=xticks, ticktext=xtext),
-        yaxis=dict(title="kW"), #range=[0, 4000]),  # Primary y-axis for power fluxes
-        yaxis2=dict(title="kW"),
-        yaxis3=dict(title="kW"),
+        xaxis3=dict(title="Timesteps"),  # Shared x-axis for all subplots
+        yaxis=dict(title="Power [kW]"), #range=[0, 4000]),  # Primary y-axis for power fluxes
+        yaxis2=dict(title="Power [kW]"),
+        yaxis3=dict(title="Power [kW]"),
         legend=dict(title="Legend"),
         template="plotly_white",
         height=800  # Adjust the height for better visualization
