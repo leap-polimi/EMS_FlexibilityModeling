@@ -1,6 +1,6 @@
 # EMS4Flex
 
-Energy Management System (EMS) originally developed by [**LEAP scarl**](www.leap.polimi.it) and [**Politecnico di Milano**](www.polimi.it).
+Energy Management System (EMS) originally developed by [**LEAP scarl**](https://www.leap.polimi.it) and [**Politecnico di Milano**](https://www.polimi.it).
 
 This repository is a **fork of the original EMS project**.
 It extends the original modeling framework by introducing detailed flexibility modeling, aimed at assessing both **implicit and explicit flexibility provision by multi-energy systems**.
