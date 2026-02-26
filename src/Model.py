@@ -6,8 +6,9 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
-Further development / modifications (fork):
-Copyright (C) 2024-2026 Andrea Scrocca and Filippo Bovera
+Modifications in this fork are authored by:
+- Andrea Scrocca
+- Filippo Bovera
 Affiliation: Politecnico di Milano, Department of Energy
 
 This file is part of EMS

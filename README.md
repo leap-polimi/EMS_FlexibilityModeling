@@ -10,6 +10,7 @@ It extends the original modeling framework by introducing detailed flexibility m
 Modifications in this fork are authored by:
 - Andrea Scrocca
 - Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
 
 The original EMS project is credited to its original authors and maintainers (see “Original project credits” below).
 
@@ -17,32 +18,43 @@ The original EMS project is credited to its original authors and maintainers (se
 
 ## What’s new in this fork
 
-The major development in this fork is the detailed modeling of the flexibility potential that the system can provide.
+The major development in this fork is the detailed modeling of the flexibility that the system can provide.
 
 ### 1) Implicit flexibility via detailed Italian electricity bill structure
 
-This fork introduces a more accurate representation of the Italian electricity bill, enabling the investigation of implicit flexibility provision (i.e., flexibility driven by tariff components and billing structure rather than explicit market remuneration).
+This fork introduces a more accurate representation of the Italian electricity bill, enabling the investigation of implicit flexibility provision (i.e., flexibility driven by tariff components and billing structure rather than explicit market remuneration). In particular, it adds novel modeling for negative injected energy for BESS in the Italian context. This allows the BESS to treat previously withdrawn energy as exempt from grid tariffs if it is later re-injected into the grid (i.e., under a pure arbitrage operation).
 
 ### 2) Explicit flexibility via enhanced FLEX block
 
 This fork strengthens the FLEX block to model explicit flexibility service provision, enabling participation in a Local Flexibility Market (LFM).
 
 Flexibility services are modeled through two key elements:
-- Power reserve (capacity committed/available for service provision)
-- Service activation (energy/power actually delivered when the service is called)
+- Power reserve (capacity committed for service provision)
+- Service activation (energy actually delivered when the service is called)
+
+---
+
+## How to use the model to optimize implicit flexibility provision
+
+The model can capture implicit flexibility from controllable assets, since electricity withdrawals are priced according to the Italian retail bill structure. In particular, the objective accounts for:
+- energy-based grid charges [€/kWh],
+- capacity-based charges [€/kW],
+- fixed charges [€/month].
+
+As a result, the optimizer may shift consumption and production to reduce total bill components even without any explicit flexibility remuneration. If you want to represent a different billing or tariff framework, you may need to adapt the POD parameters and related constraints accordingly.
 
 ---
 
 ## How to use the model to optimize participation in explicit flexibility schemes
 
-The model can be used in two main modes, depending on whether you are planning reserve bids ahead of time or operating under real-time dispatch instructions.
+The model can be used in two main modes for explicit flexibility provision, depending on whether you are planning reserve bids ahead of time or operating under real-time dispatch instructions.
 
 ### 1) Optimize power-reserve bids in month-ahead or day-ahead auctions (Scheduling)
 Use this mode to determine how much upward reserve capacity should be retained from flexible assets (e.g., BESS, CHP) so that the site can comply with possible DSO activation requests during the availability window.
 
 Set:
 - logic_schedulingReschedulingSelection_p = 0 (scheduling)
-- FLEX_b.logic_is_capacityRetention_Optimized_p == 1 (capacity retention is variable--> it has to be optimized)
+- FLEX_b.logic_is_capacityRetention_Optimized_p == 1 (capacity retention is a variable, i.e. it has to be optimized)
 
 Provide as inputs:
 - Reserve remuneration (€/MW/h)
@@ -53,11 +65,11 @@ Provide as inputs:
 Output:
 - The economically optimal power band to reserve and offer in the market, ensuring feasibility against potential dispatch orders within the DSO-defined time window.
 
-Note: Since this is a forward-planning stage, results strongly depend on the quality of forecasts.
+Note: Since this is a forward-planning stage, results strongly depend on provided forecasts.
 
 ### 2) Optimize system operation under real-time measurements and dispatching orders (Rescheduling)
 Use this mode when the DSO provides dispatching/activation orders close to real time (e.g., with at least 1 hour notice). The model can then be run in a rolling-horizon mode:
-- Optimize control actions for the next hour using measured inputs and potential dispatching orders
+- Optimize control actions for the next hour using measured inputs and considering potential dispatching orders
 - Re-optimize the remaining horizon (e.g., the next 23 hours) using updated forecasts
 
 Set:

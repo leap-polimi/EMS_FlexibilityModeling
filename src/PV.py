@@ -7,6 +7,11 @@ Authors:
 - Marco Gabba
 - Filippo Bovera
 
+Modifications in this fork are authored by:
+- Andrea Scrocca
+- Filippo Bovera
+Affiliation: Politecnico di Milano, Department of Energy
+
 This file is part of EMS
 
 This program is free software: you can redistribute it and/or modify
