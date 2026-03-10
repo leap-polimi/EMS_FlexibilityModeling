@@ -10,6 +10,7 @@ It extends the original modeling framework by introducing detailed flexibility m
 Modifications in this fork are authored by:
 - Andrea Scrocca
 - Filippo Bovera
+
 Affiliation: Politecnico di Milano, Department of Energy
 
 The original EMS project is credited to its original authors and maintainers (see “Original project credits” below).
