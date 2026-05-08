@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+title: "EMS_FlexibilityModeling: Energy Management System for Flexibility Modeling"
+version: "1.0.0"
+date-released: "2026-05-08"
+type: software
+
+authors:
+  - family-names: "Scrocca"
+    given-names: "Andrea"
+    affiliation: "Politecnico di Milano, Department of Energy"
+  - family-names: "Bovera"
+    given-names: "Filippo"
+    affiliation: "Politecnico di Milano, Department of Energy"
+
+repository-code: "https://github.com/leap-polimi/EMS_FlexibilityModeling"
+url: "https://github.com/leap-polimi/EMS_FlexibilityModeling"
+license: "GPL-3.0-or-later"
+
+abstract: "EMS_FlexibilityModeling is a fork of an Energy Management System model extended for the detailed modeling of flexibility provision by multi-energy systems, including implicit and explicit flexibility services, battery energy storage systems, and local flexibility market participation."
+
+keywords:
+  - energy management system
+  - flexibility
+  - multi-energy systems
+  - optimization
+  - mixed-integer linear programming
+  - block-based modeling
+  - battery energy storage systems
+  - local flexibility markets
+
+references:
+  - type: software
+    title: "EMS_Foundational: Original Energy Management System model"
+    authors:
+      - family-names: "Zatti"
+        given-names: "Matteo"
+        affiliation: "LEAP scarl"
+      - family-names: "Gabba"
+        given-names: "Marco"
+        affiliation: "LEAP scarl"
+      - family-names: "Bovera"
+        given-names: "Filippo"
+        affiliation: "Politecnico di Milano, Department of Energy"
+    repository-code: "https://github.com/leap-polimi/EMS_Foundational"
+    url: "https://github.com/leap-polimi/EMS_Foundational"
