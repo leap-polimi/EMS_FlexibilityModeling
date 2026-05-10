@@ -4,6 +4,7 @@ title: "EMS_FlexibilityModeling: Energy Management System for Flexibility Modeli
 version: "1.0.0"
 date-released: "2026-05-08"
 type: software
+doi: "10.5281/zenodo.20085399"
 
 authors:
   - family-names: "Scrocca"
@@ -14,7 +15,7 @@ authors:
     affiliation: "Politecnico di Milano, Department of Energy"
 
 repository-code: "https://github.com/leap-polimi/EMS_FlexibilityModeling"
-url: "https://github.com/leap-polimi/EMS_FlexibilityModeling"
+url: "https://doi.org/10.5281/zenodo.20109598"
 license: "GPL-3.0-or-later"
 
 abstract: "EMS_FlexibilityModeling is a fork of an Energy Management System model extended for the detailed modeling of flexibility provision by multi-energy systems, including implicit and explicit flexibility services, battery energy storage systems, and local flexibility market participation."

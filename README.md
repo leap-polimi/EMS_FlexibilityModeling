@@ -1,19 +1,11 @@
 # EMS4Flex
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20085398.svg)](https://doi.org/10.5281/zenodo.20085398)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20085399.svg)](https://doi.org/10.5281/zenodo.20085399)
 
 Energy Management System (EMS) originally developed by [**LEAP scarl**](https://www.leap.polimi.it) and [**Politecnico di Milano**](https://www.polimi.it).
 
 This repository is a **fork of the original EMS project**.
 It extends the original modeling framework by introducing detailed flexibility modeling, aimed at assessing both **implicit and explicit flexibility provision by multi-energy systems**.
-
-## Citation
-
-If you use this software in scientific work, please cite the archived release:
-
-Scrocca, A., & Bovera, F. (2026). *EMS_FlexibilityModeling: Energy Management System for Flexibility Modeling* (Version 1.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.20085398
-
-A machine-readable citation file is also available in [`CITATION.cff`](CITATION.cff).
 
 ## Fork authorship and contributions
 
@@ -24,6 +16,14 @@ Modifications in this fork are authored by:
 Affiliation: Politecnico di Milano, Department of Energy
 
 The original EMS project is credited to its original authors and maintainers (see “Original project credits” below).
+
+## Citation
+
+If you use this software in scientific work, please cite the archived release:
+
+Scrocca, A., & Bovera, F. (2026). *EMS_FlexibilityModeling: Energy Management System for Flexibility Modeling* (Version 1.0.0) [Software]. Zenodo. https://doi.org/10.5281/zenodo.20085399
+
+A machine-readable citation file is also available in [`CITATION.cff`](CITATION.cff).
 
 ---
 
